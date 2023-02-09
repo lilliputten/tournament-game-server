@@ -51,8 +51,8 @@ CORS(
         # origin must be provided; even if you are using a CORS unblocker
         # extension, the requests will still fail.
         r'*': {
-            #  'origins': '*',
-            'origins': config['legalOrigins'],
+            'origins': '*',
+            # 'origins': config['legalOrigins'],
         },
     },
 )
