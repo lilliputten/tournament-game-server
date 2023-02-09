@@ -43,7 +43,7 @@ CORS(
     app,
     expose_headers='Authorization',
     allow_headers=['Content-Type', 'Authorization', 'Access-Control-Allow-Credentials'],
-    supports_credentials=True,
+    supports_credentials=False,
     resources={
         # https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch#sending_a_request_with_credentials_included
         # Note: Access-Control-Allow-Origin is prohibited from using a wildcard
@@ -51,8 +51,8 @@ CORS(
         # origin must be provided; even if you are using a CORS unblocker
         # extension, the requests will still fail.
         r'*': {
-            'origins': '*',
-            # 'origins': config['legalOrigins'],
+            #  'origins': '*',
+            'origins': config['legalOrigins'],
         },
     },
 )

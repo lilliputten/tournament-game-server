@@ -15,6 +15,8 @@ from flask import jsonify
 from config import config
 from src import serverUtils
 
+#  from . import app;
+
 from src.core.lib.logger import DEBUG
 from src.core.lib.logger import (
     #  getMsDateTag,
@@ -36,6 +38,7 @@ DEBUG('@:blueprintRootApi: starting', {
 
 
 @blueprintRootApi.route(apiRoot + '/start')  # , methods=['GET', 'OPTIONS'])
+#  @app.before_request
 def blueprintRootApi_start():
     requestError = serverUtils.checkInvalidRequestError(checkToken=False)
     if requestError:
