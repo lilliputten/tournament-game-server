@@ -3,7 +3,7 @@
 # @module index.wsgi
 # @desc Fullspace hosting server start script
 # @since 2019.03.28, 21:32
-# @changed 2023.02.09, 21:02
+# @changed 2023.02.09, 21:22
 
 import sys  # noqa
 import os  # noqa
