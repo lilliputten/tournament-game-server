@@ -8,7 +8,7 @@
 
 from flask import Blueprint
 #  from flask import send_from_directory  # For htmlAppBuild serving
-#  from flask import render_template  # Used for `blueprintCoreSite_root_hello`
+from flask import render_template  # Used for `blueprintCoreSite_root_hello`
 #  from flask import redirect
 #  from flask import jsonify
 #  from flask import request
@@ -33,7 +33,7 @@ DEBUG(getTrace('starting'), {
 
 
 @blueprintCoreSite.route('/')
-def blueprintCoreSite_root_erro():
+def blueprintCoreSite_root_error():
     DEBUG(getTrace())
     # Emulate error response
     err = {
@@ -43,13 +43,13 @@ def blueprintCoreSite_root_erro():
     return serverUtils.makeErrorForRequest(err)
 
 
-#  @blueprintCoreSite.route('/hello')
-#  """
-#  render_template demo
-#  """
-#  def blueprintCoreSite_root_hello():
-#      DEBUG(getTrace())
-#      return render_template('hello.html')
+@blueprintCoreSite.route('/hello')
+def blueprintCoreSite_root_hello():
+    """
+    render_template demo
+    """
+    DEBUG(getTrace())
+    return render_template('hello.html')
 
 
 #  @blueprintCoreSite.route('/')

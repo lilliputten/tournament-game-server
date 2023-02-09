@@ -29,7 +29,7 @@ if doInit:  # NOTE: Initializing only once (avoiding double initialization with 
     #  from flask import url_for
 
     from . import serverUtils
-    #  from .blueprintTest import blueprintTest
+    from .blueprintTest import blueprintTest
     from .blueprintCoreSite import blueprintCoreSite
     from .blueprintRootApi import blueprintRootApi
     from .blueprintRequests import blueprintRequests
@@ -50,7 +50,7 @@ if doInit:  # NOTE: Initializing only once (avoiding double initialization with 
 
     #  Register blueprint apis...
 
-    #  app.register_blueprint(blueprintTest)
+    app.register_blueprint(blueprintTest)
     app.register_blueprint(blueprintCoreSite)
     app.register_blueprint(blueprintRootApi)
     app.register_blueprint(blueprintRequests)

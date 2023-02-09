@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @module logger
 # @since 2020.02.23, 02:18
-# @changed 2022.03.26, 00:20
+# @changed 2023.02.09, 18:06
 
 import math
 from os import path
@@ -80,19 +80,18 @@ def DEBUG(title, data=None):
     global hasLoggedEntries  # pylint: disable=global-statement
     header = createHeader()
     logData = createLogData(title, data)  # Ensure trailing newline for record delimiting
-    fileMode = 'a'  # Default file mode: append (ab)
+    fileMode = 'ab'  # Default file mode: append (ab)
     if not hasLoggedEntries:
         #  print('[Log started]\n'  # Insert empty line to stdout)
         if config['clearLogFile']:
-            fileMode = 'w'  # Clear file on first entry (wb)
+            fileMode = 'wb'  # Clear file on first entry (wb)
         hasLoggedEntries = True
     if config['writeLog']:
         rootPath = config['rootPath']
         logFile = path.join(rootPath, config['logFileName'])
-        with open(logFile, fileMode, encoding='utf-8') as file:
-            file.write(header + '\n')
-            file.write(title + '\n')
-            file.write(logData + '\n')
+        #  with open(logFile, fileMode, encoding='utf-8') as file:
+        with open(logFile, fileMode) as file:
+            file.write((header + '\n' + title + '\n' + logData + '\n').encode('utf-8'))
     if config['outputLog']:
         if config['outputColoredLog']:
             header = colored(header, 'green')

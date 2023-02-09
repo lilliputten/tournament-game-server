@@ -128,29 +128,26 @@ config = {  # Default config
     # API
 
     'legalOrigins': [
-        #  'http://localhost:5000',  # Flask app -- only for isDev
-        #  'http://localhost:3000',  # Nextjs app -- only for isDev
-        #  'http://back.march.team',
-        #  'https://back.march.team',
-        'http://demo.march.team',
-        'https://demo.march.team',
-        'http://march.team',
-        'https://march.team',
+        'http://localhost:5000',  # Flask app -- only for isDev
+        'http://localhost:3000',  # Nextjs app -- only for isDev
+        # Real endpoint addresses...
+        'https://tournament-game-build.march.team/',
+        'http://tournament-game-build.march.team/',
     ],
 
-    'apiRoot': '/api/v1.0',
+    'apiRoot': '/api/v1.0',  # Eg: http://localhost:5000/api/v1.0/start
     'apiUser': 'api',
     'apiPass': 'pusplndvqaivbynv',  # Authorization: Basic YXBpOnB1c3BsbmR2cWFpdmJ5bnY=
 
     # Send mail
 
-    'mailFromAddr': '"MarchTeam Site" <site@march.team>',
-    'mailToAddr': ['mail@march.team'],
+    'mailFromAddr': '"Tournament Site" <tournament@march.team>',
+    'mailToAddr': ['tournament@march.team'],
     'mailToBCCAddr': ['dmia@yandex.ru'],
 
     'mailUser': 'site@march.team',
-    #  'mailUser': 'march.team.realty@gmail.com',
     'mailPass': 'M1qcqujpwflapqfgh',  # App pwd for `site@march.team`
+    #  'mailUser': 'march.team.realty@gmail.com',
     #  'mailPass': 'mqcqujpwflapqfgh',  # App pwd for `march.team.realty@gmail.com`
 
 }

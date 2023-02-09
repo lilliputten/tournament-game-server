@@ -18,7 +18,7 @@ clientStaticPath = config['clientStaticPath']
 clientTemplatePath = config['clientTemplatePath']
 clientStaticUrl = config['clientStaticUrl']
 
-DEBUG('@:app: starting', {
+DEBUG('@:app: starting (проба)', {
     'clientStaticPath': clientStaticPath,
     'clientTemplatePath': clientTemplatePath,
     'clientStaticUrl': clientStaticUrl,
@@ -58,7 +58,7 @@ CORS(
 )
 # Check OPTIONS request:
 # curl -v -H "Authorization: Basic YXBpOnB1c3BsbmR2cWFpdmJ5bnY=" \
-# -X OPTIONS https://back.march.team/api/v1.0/start
+# -X OPTIONS https://URL/api/v1.0/start
 # Configure precise origins:
 # api_v1_cors_config = {
 #   "origins": ["http://localhost:5000"]
