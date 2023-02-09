@@ -88,6 +88,10 @@ config = {  # Default config
     'timetag': timetag,
     'buildTag': buildTag,
 
+    'errorSendCode': True,
+    'errorResponseType':'text',
+    #  'errorResponseType': 'json',
+
     # Path parameters...
 
     'rootPath': rootPath,  # RO!

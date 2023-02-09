@@ -2,7 +2,7 @@
 # @module serverUtils
 # @desc Helper soutines for server.
 # @since 2022.02.12, 02:41
-# @changed 2022.04.02, 14:49
+# @changed 2023.02.10, 00:57
 
 import traceback
 
@@ -23,31 +23,33 @@ from src.core.lib.utils import getTrace
 
 
 def makeErrorResponse(errorData):
-    keys = errorData.keys()
-    result = ''
-    for key in keys:
-        val = errorData[key]
-        result += key + ': ' + str(val) + '\n'
     # @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
     code = errorData['code'] if 'code' in errorData else 500
     DEBUG(getTrace(), {
         #  'keys': list(keys),
         'code': code,
-        'result': result,
         'errorData': errorData,
     })
-    #  return result, code, {
-    #      # 'Content-Type': 'text/html; charset=utf-8',
-    #      'Content-Type': 'text/plain; charset=utf-8',
-    #  }
-    return jsonify(errorData)  # , code -- NOTE: Don't send http error codes so it breaks down CORS requests!
+    # NOTE: Don't send http error codes so it breaks down CORS requests!
+    resCode = code if config['errorSendCode'] else 200
+    if config['errorResponseType'] == 'json':  # json
+        return jsonify(errorData), resCode
+    else:  # text
+        keys = errorData.keys()
+        result = ''
+        for key in keys:
+            val = errorData[key]
+            result += key + ': ' + str(val) + '\n'
+        return result, resCode, {
+            'Content-Type': 'text/plain; charset=utf-8',
+        }
     #  return render_template('error-not-found.html', error=error), code
 
 
 def makeErrorForRequest(errDict):
     if errDict is None:
         errDict = {}
-    error = errDict.get('error', 'Not Found')
+    error = errDict.get('error', 'Endpoint not found')
     code = errDict.get('code', 404)
     url = errDict.get('url', request.url)
     method = errDict.get('method', request.method)
@@ -140,8 +142,8 @@ def server_handle_not_found(err):
     protocol = request.scheme
     errorData = {
         'code': code,
-        'error': 'Not Found',
-        'systemError': error,
+        'error': 'Resource not found',
+        #  'systemError': error,
         'url': url,
         'method': method,
         'protocol': protocol,
