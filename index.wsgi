@@ -3,12 +3,13 @@
 # @module index.wsgi
 # @desc Fullspace hosting server start script
 # @since 2019.03.28, 21:32
-# @changed 2022.02.07, 21:27
+# @changed 2023.02.09, 21:01
 
 import sys  # noqa
 import os  # noqa
 
-venv = 'venv-py3-flask'  # Python 3.6
+venv = 'venv-py3.10-flask'  # Python 3.10
+#  venv = 'venv-py3-flask'  # Python 3.6
 #  venv = 'virtualenv'  # Default
 #  venv = 'venv-flask'  # Python 2.7
 
