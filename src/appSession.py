@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @module appSession
 # @since 2022.02.07, 00:27
-# @changed 2022.04.02, 15:44
+# @changed 2023.02.10, 01:41
 
 import uuid
 import random
@@ -87,8 +87,10 @@ def getOrCreateToken(callerId=''):
 
 
 def addExtendedSessionToResponse(res):
+    # TODO: Check for regular response?
     Token = session.get('Token', '')  # getOrCreateToken('addExtendedSessionToResponse')
     if Token:
+        # TODO: Set samesite in dependency with response origin property?
         res.set_cookie('Token', Token, samesite='None', secure=True)
 
 

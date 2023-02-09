@@ -133,8 +133,8 @@ config = {  # Default config
 
     'legalOrigins': [
         # Real endpoint addresses...
-        'https://tournament-game-build.march.team/',
-        'http://tournament-game-build.march.team/',
+        'https://tournament-game-build.march.team',
+        'http://tournament-game-build.march.team',
     ],
 
     'apiRoot': '/api/v1.0',  # Eg: http://localhost:5000/api/v1.0/start
@@ -155,9 +155,9 @@ config = {  # Default config
 }
 
 
-# if isDev:
-#     config['legalOrigins'].append('http://localhost:3000')
-#     config['legalOrigins'].append('http://localhost:5000')
+if isDev:
+   config['legalOrigins'].append('http://localhost:3000')
+   config['legalOrigins'].append('http://localhost:5000')
 
 
 updateConfigWithYaml(config, yamlConfigFilename)
