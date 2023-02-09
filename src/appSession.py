@@ -89,7 +89,7 @@ def getOrCreateToken(callerId=''):
 def addExtendedSessionToResponse(res):
     Token = session.get('Token', '')  # getOrCreateToken('addExtendedSessionToResponse')
     if Token:
-        res.set_cookie('Token', Token)
+        res.set_cookie('Token', Token, samesite='None', secure=True)
 
 
 __all__ = [  # Exporting objects...
