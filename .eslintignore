@@ -1,0 +1,29 @@
+
+# Config, content and system-related stuff...
+.*
+node_modules/
+/static/local-cdn/
+public/
+build/
+bundles/
+utils/
+dist/
+/test*
+/temp*
+
+!.*.js
+
+# Django
+django_project/
+templates/
+
+# Non-code folders...
+\!Patches/
+\!Project/
+\!Samples/
+\!Work
+\!UNUSED/
+
+# Samples (may be linted sometimes; then comment first global rule or make exclusion)
+\!Samples/
+\!Samples/180920-bootstrap-4.1.3/

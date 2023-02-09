@@ -1,0 +1,66 @@
+<!--
+ vim: ft=markdown:
+ @changed 2020.07.03, 22:56
+-->
+
+# Cam flask photo receiver server & raspberry camera client
+
+## Project docs
+
+- `README.md`
+- `TODO.md`
+- `CHANGELOG.md`
+
+## Config files
+
+- `package.json`
+- `requirements.txt`
+- `.lvimrc`
+- `.editorconfig`
+- `jest.config.js`
+- `.flake8`
+- `.eslintrc.yml`
+- `.eslintignore`
+- '.stylelintrc.yml'
+
+## Module extensions
+
+- `*.py,*.wsgi,*.js,*.jsx,*.ts,*.tsx,*.css,*.pcss,*.styl,*.md,*.json,*.yml,*.yaml,*.sh,*.md,*.txt`
+
+## Creating virtual environment
+
+```shell
+# System global (if not installed)
+pip install setuptools virtualenv virtualenvwrapper-win
+
+# Project local:
+python -m virtualenv -p C:\Python27\python.exe .venv
+call .venv/Scripts/activate
+virtualenv .venv
+.venv/bin/activate
+
+# Install all requirements:
+pip install -r requirements-dev.txt
+pip install -r requirements.txt
+# More pip examples:
+pip install Flask==1.0.2
+pip freeze Flask
+pip freeze > requirements.txt
+```
+
+## Demo flask server
+
+- Set flask env: `set FLASK_APP=server/server.py:app` (or add into `.flaskenv`)
+- Run in console: `flask run`
+- Open `http://127.0.0.1:5000/`
+
+## Python in vim
+
+NOTE: vim and python must be both 32 or 64 bit (32 bit on 2019.02.04 -- use 32bit Python27 -- python-2.7.15-32bit.msi)
+
+- [VIM and Python – A Match Made in Heaven – Real Python](https://realpython.com/vim-and-python-a-match-made-in-heaven/#vim-extensions)
+
+## Flask docs:
+
+- [Быстрый старт — Документация Flask (русский перевод) 0.10.1](https://flask-russian-docs.readthedocs.io/ru/latest/quickstart.html)
+

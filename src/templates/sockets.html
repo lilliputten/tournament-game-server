@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block title %}Sockets test{% endblock %}
+
+{% block content %}
+  {% if name %}
+    <h1>Sockets started, {{ name }}!</h1>
+  {% else %}
+    <h1>Sockets started!</h1>
+  {% endif %}
+{% endblock %}

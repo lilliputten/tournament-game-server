@@ -1,0 +1,16 @@
+{
+    "files.exclude": {
+        // "static/**/*",
+        "**/*.tmp": true,
+        "**/.*.sw?": true,
+        "**/*.pyc": true
+    },
+    "python.venvFolders": [
+        ".venv"
+    ],
+    "python.linting.pylintEnabled": false,
+    "python.linting.flake8Enabled": true,
+    "python.linting.enabled": true,
+    "python.pythonPath": "d:\\Work\\RPi\\210725-flask-socket\\flask-socket-2107\\.venv\\Scripts\\python.exe",
+    "terminal.integrated.shellArgs.windows": ["-ExecutionPolicy", "Bypass"]
+}

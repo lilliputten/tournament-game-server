@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+
+{% block title %}Server error{% endblock %}
+
+{% block content %}
+<h1>Internal server error</h1>
+<p><strong>Error message:</strong> {{error}}</p>
+<p>For detailed information see server log.</p>
+{% endblock %}

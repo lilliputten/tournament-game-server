@@ -1,0 +1,18 @@
+#!/bin/sh
+# vim: ft=sh
+# @desc Override config variables (common version -- stored in repository)
+# @changed 2022.05.26, 00:05
+
+# # Set specific python executable path...
+# PYTHON_RUNTIME="/usr/bin/python3.10"
+# if [ "$IS_WINDOWS" ]; then
+#   PYTHON_RUNTIME="C:/Python310/python.exe"
+# fi
+
+# # Customize specific posix command names if needed (eg, if tou use cygwin installation and overrided shared command names)...
+# if [ "$IS_CYGWIN" ]; then
+#     # Don't use windows' own native commands
+#     FINDCMD="find_"
+#     SORTCMD="sort_"
+#     GREPCMD="grep_"
+# fi

@@ -1,0 +1,168 @@
+# -*- coding:utf-8 -*-
+# @module config
+# @desc Universal server & client config
+# @since 2022.02.06, 23:56
+# @changed 2022.04.03, 21:43
+# See:
+#  - https://docs.python.org/3/library/configparser.html -- ???
+#  - https://stackoverflow.com/questions/9590382/forcing-python-json-module-to-work-with-ascii
+#  - https://flask.palletsprojects.com/en/2.0.x/config/
+
+import os
+from os import path
+import json
+#  import yaml
+import sys
+
+from config_helpers import updateConfigWithYaml, readFiletoString
+
+pythonVersion = sys.version
+
+#  Determine running under test suite...
+isTest = 'unittest' in sys.modules
+
+gunicornEnv = os.getenv('GUNICORN_ENV')  # Detect gunicorn server (run on a raspberry pi)
+flaskEnv = os.getenv('FLASK_ENV')  # detect flask server (dev mode)
+isGunicorn = bool(gunicornEnv)
+isRPi = isGunicorn
+isDev = flaskEnv == 'development'
+isProd = not isDev
+
+rootPath = path.dirname(path.abspath(__file__))  # Project root path
+
+yamlConfigFilename = path.join(rootPath, 'config.yml')
+yamlLocalConfigFilename = path.join(rootPath, 'config.local.yml')
+
+uploadPath = path.join(rootPath, 'uploads')
+
+# Project structure
+
+# (UNUSED) See link creation in `utils/make-html-app-links.sh`, `utils/make-html-app-links-local.sh`
+#  Generate/read build parameters (version, timetag etc)
+#  Default values (empty)...
+version = ''
+timestamp = ''
+timetag = ''
+buildTag = ''
+#  Filenames...
+buildVersionFilename = path.join(rootPath, 'build-version.txt')
+buildTagFilename = path.join(rootPath, 'build-tag.txt')
+timestampFilename = path.join(rootPath, 'build-timestamp.txt')
+timetagFilename = path.join(rootPath, 'build-timetag.txt')
+packageFilename = path.join(rootPath, 'package.json')
+#  Read version...
+#  print('config: packageFilename', packageFilename  # DEBUG)
+if path.isfile(buildVersionFilename):
+    version = readFiletoString(buildVersionFilename, 'UNSPECIFIED')
+elif path.isfile(packageFilename):
+    with open(packageFilename, encoding='utf-8') as pkgConfigFile:
+        pkgConfig = json.load(pkgConfigFile)
+        version = pkgConfig['version'].encode('ascii')
+        #  pkgConfigFile.close()
+# Read timestamp/timetag...
+if path.isfile(timestampFilename):
+    timestamp = readFiletoString(timestampFilename)
+if path.isfile(timetagFilename):
+    timetag = readFiletoString(timetagFilename)
+# Read/generate buildTag...
+if version and timetag:
+    buildTag = 'v.' + version + '-' + timetag
+elif path.isfile(buildTagFilename):
+    buildTag = readFiletoString(buildTagFilename)
+
+config = {  # Default config
+
+    # Application parameters...
+
+    'flaskEnv': flaskEnv,
+    'gunicornEnv': gunicornEnv,
+    'isGunicorn': isGunicorn,
+    'isRPi': isRPi,
+    'isDev': isDev,
+    'isProd': isProd,
+    'isTest': isTest,
+
+    'pythonVersion': pythonVersion,
+    'version': version,
+    'timestamp': timestamp,
+    'timetag': timetag,
+    'buildTag': buildTag,
+
+    # Path parameters...
+
+    'rootPath': rootPath,  # RO!
+    'uploadPath': uploadPath,
+
+    # Generated client path (see `cam-client-app-build`, TODO?)
+
+    #  'clientTemplatePath': path.join(rootPath, 'cam-client-app-build'),
+    'clientTemplatePath': path.join(rootPath, 'src/templates'),
+    'clientStaticPath': path.join(rootPath, 'static'),
+    #  'clientStaticPath': path.join(clientTemplatePath, 'static'),
+    'clientStaticUrl': '/static',
+    #  'clientStaticUrl': '',
+
+    # Logging...
+
+    'outputLog': True,  # Print log to stdout
+    'outputColoredLog': True,  # Use rich output log format with `termcolor`
+    'writeLog': True,  # Write log to external file
+    'clearLogFile': True,  # Clear log file at start
+    'logFileName': 'log.txt',  # Log file name (relative to `rootPath`!)
+
+    # Datetime formats...
+
+    'dateTagFormat': '%y%m%d-%H%M',  # eg: '220208-0204'
+    'dateTagPreciseFormat': '%y%m%d-%H%M%S',  # eg: '220208-020423'
+    'shortDateFormat': '%Y.%m.%d %H:%M',  # eg: '2022.02.08-02:04'
+    'preciseDateFormat': '%Y.%m.%d %H:%M:%S',  # eg: '2022.02.08-02:04:23'
+    'logDateFormat': '%y%m%d-%H%M%S-%f',  # eg: '220208-020423-255157'
+    'detailedDateFormat': '%Y.%m.%d %H:%M:%S.%f',  # eg: '2022.02.08-02:04:23.255157'
+
+    # Databases...
+
+    'dbPath': path.join(rootPath, 'db'),
+    #  'dbExt': '.db',  # sqlite3 database file extensions
+    'dbExt': '.json',  # tinydb database file extensions
+
+    # API
+
+    'legalOrigins': [
+        #  'http://localhost:5000',  # Flask app -- only for isDev
+        #  'http://localhost:3000',  # Nextjs app -- only for isDev
+        #  'http://back.march.team',
+        #  'https://back.march.team',
+        'http://demo.march.team',
+        'https://demo.march.team',
+        'http://march.team',
+        'https://march.team',
+    ],
+
+    'apiRoot': '/api/v1.0',
+    'apiUser': 'api',
+    'apiPass': 'pusplndvqaivbynv',  # Authorization: Basic YXBpOnB1c3BsbmR2cWFpdmJ5bnY=
+
+    # Send mail
+
+    'mailFromAddr': '"MarchTeam Site" <site@march.team>',
+    'mailToAddr': ['mail@march.team'],
+    'mailToBCCAddr': ['dmia@yandex.ru'],
+
+    'mailUser': 'site@march.team',
+    #  'mailUser': 'march.team.realty@gmail.com',
+    'mailPass': 'M1qcqujpwflapqfgh',  # App pwd for `site@march.team`
+    #  'mailPass': 'mqcqujpwflapqfgh',  # App pwd for `march.team.realty@gmail.com`
+
+}
+
+
+if isDev:
+    config['legalOrigins'].append('http://localhost:3000')
+
+
+updateConfigWithYaml(config, yamlConfigFilename)
+updateConfigWithYaml(config, yamlLocalConfigFilename)
+
+#  #  DEBUG
+#  print('Config:', config)
+#  print('Done')

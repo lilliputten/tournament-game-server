@@ -1,0 +1,36 @@
+/** @module styles.css
+ * @since 2020.10.01, 00:41
+ * @changed 2020.10.26, 02:14
+ */
+
+.no-styles-warning {
+  display: none;
+}
+
+.content {
+  /* border: 1px solid red; */
+}
+
+.viewImage .imageFrame {
+  max-width: 100%;
+  overflow: hidden;
+}
+.viewImage .image {
+  width: 100%;
+  height: auto;
+}
+
+ul.images {
+  list-style-type: none;
+  padding-left: 0;
+}
+ul.images .count {
+  display: inline-block;
+  width: 50px;
+  opacity: .75;
+  text-align: right;
+  margin-right: 10px;
+}
+.light {
+  font-weight: 300;
+}

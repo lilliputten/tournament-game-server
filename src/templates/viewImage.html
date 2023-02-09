@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block title %}{{id}} &#151; View image{% endblock %}
+
+{% block content %}
+  <div class="viewImage card">
+    <div class="card-body">
+      <h1 class="light mb-3">Show image from {{ip}} @ {{timestamp}}</h1>
+      <div class="imageFrame mb-3"><img class="image" width="{{imageWidth}}" height="{{imageHeight}}" alt="{{timestamp}}" src="{{url_for('sendImageFile', id=id)}}"></div>
+      <div class="btn-group">
+        <a type="button" class="btn btn-primary btn-ok" href="/list"><i class="fa fa-home"></i> All images list</a>
+        <button class="btn btn-danger" data-href="/remove" data-toggle="modal" data-target="#confirm-delete"><i class="fa fa-trash"></i> Remove all images</a></button>
+      </div>
+    </div>
+  </div>
+{% endblock %}

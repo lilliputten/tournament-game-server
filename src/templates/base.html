@@ -1,0 +1,37 @@
+<!doctype html>
+<!--
+  @changed 2022.02.12, 03:32
+-->
+<html>
+  <head>
+    <title>{% block title %}{% endblock %} &#151; March.Team Backend</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" />
+    <!-- Bootstrap css assets... -->
+    <link rel="stylesheet" {% if 'FLASK_ENV'|getenv == 'development' %}href="{{ url_for('static', filename='local-cdn/bootstrap/4.5.2/css/bootstrap.css') }}"{% else %}href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous"{% endif %} />
+    <link rel="stylesheet" {% if 'FLASK_ENV'|getenv == 'development' %}href="{{ url_for('static', filename='local-cdn/font-awesome/4.7.0/css/font-awesome.css') }}"{% else %}href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"{% endif %} />
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <!--
+    <link rel="stylesheet" href="/flask-static/styles.css">
+    -->
+  </head>
+  <body class="body">
+
+    <div class="no-styles-warning">
+      <!-- TODO: To use no-scripts warning? -->
+      <strong>ATTENTION:</strong> No styles loaded. Check for build/publish template folders.
+    </div>
+
+    <div class="content" id="content">
+      {% block content %}{% endblock %}
+    </div>
+
+    <!-- Bootstrap/jquery script assets... -->
+    <script {% if 'FLASK_ENV'|getenv == 'development' %}src="{{ url_for('static', filename='local-cdn/jquery/3.5.1/jquery-3.5.1.slim.min.js') }}"{% else %}src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"{% endif %}></script>
+    <script {% if 'FLASK_ENV'|getenv == 'development' %}src="{{ url_for('static', filename='local-cdn/bootstrap/4.5.2/js/bootstrap.min.js') }}"{% else %}src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"{% endif %}></script>
+    <script {% if 'FLASK_ENV'|getenv == 'development' %}src="{{ url_for('static', filename='local-cdn/socket.io/4.4.1/socket.io.min.js') }}"{% else %}src="https://cdn.socket.io/4.4.1/socket.io.min.js" integrity="sha384-fKnu0iswBIqkjxrhQCTZ7qlLHOFEgNkRmK2vaO/LbTZSXdJfAu6ewRBdwHPhBo/H" crossorigin="anonymous"{% endif %}></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+  </body>
+</html>

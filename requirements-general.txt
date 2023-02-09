@@ -1,0 +1,14 @@
+# General python requirements
+# @changed 2022.03.29, 21:31
+# vim: ft=conf
+
+DateTime==4.4
+Flask-Cors==3.0.10
+Flask-Mail==0.9.1
+Flask-SQLAlchemy==2.5.1
+Flask==2.0.3
+PyJWT==2.3.0
+PyYAML==6.0
+requests==2.27.1
+termcolor==1.1.0
+tinydb==4.7.0

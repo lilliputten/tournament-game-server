@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block title %}Images archive{% endblock %}
+
+{% block content %}
+  <h1 class="mb-4 light">Images list</h1>
+  {% set count = namespace(value=list|length) %}
+  <ul class="images">
+    {% for item in list %}
+    <li>
+      <span class="count text-muted">{{count.value}}.</span>
+      <a href="{{ url_for('viewImage', id=item['id']) }}">{{ item['ip'] }} @ {{ item['timestamp'] }}</a></li>
+      {% set count.value = count.value - 1 %}
+    {% endfor %}
+  </ul>
+  <div class="btn-group mt-3">
+    <button class="btn btn-danger" data-href="/remove" data-toggle="modal" data-target="#confirm-delete"><i class="fa fa-trash"></i> Remove all images</a></button>
+  </div>
+{% endblock %}
