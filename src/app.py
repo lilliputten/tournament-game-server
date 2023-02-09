@@ -43,7 +43,7 @@ CORS(
     app,
     expose_headers='Authorization',
     allow_headers=['Content-Type', 'Authorization', 'Access-Control-Allow-Credentials'],
-    supports_credentials=False,
+    supports_credentials=True,
     resources={
         # https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch#sending_a_request_with_credentials_included
         # Note: Access-Control-Allow-Origin is prohibited from using a wildcard
