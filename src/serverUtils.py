@@ -9,7 +9,7 @@ import traceback
 from flask import redirect
 from flask import request
 from flask import session
-#  from flask import jsonify
+from flask import jsonify
 #  from flask import render_template
 #  from flask import request
 #  from config import config
@@ -36,10 +36,11 @@ def makeErrorResponse(errorData):
         'result': result,
         'errorData': errorData,
     })
-    return result, code, {
-        'Content-Type': 'text/plain; charset=utf-8',
-    }
-    #  return jsonify(errorData), code
+    #  return result, code, {
+    #      # 'Content-Type': 'text/html; charset=utf-8',
+    #      'Content-Type': 'text/plain; charset=utf-8',
+    #  }
+    return jsonify(errorData)  # , code -- NOTE: Don't send http error codes so it breaks down CORS requests!
     #  return render_template('error-not-found.html', error=error), code
 
 
@@ -140,7 +141,7 @@ def server_handle_not_found(err):
     errorData = {
         'code': code,
         'error': 'Not Found',
-        #  'systemError': error,
+        'systemError': error,
         'url': url,
         'method': method,
         'protocol': protocol,

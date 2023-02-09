@@ -42,7 +42,8 @@ app.config['CORS_HEADERS'] = 'Content-Type'
 CORS(
     app,
     expose_headers='Authorization',
-    allow_headers=['Content-Type', 'Authorization', 'Access-Control-Allow-Credentials'],
+    #  allow_headers=['Accept', 'Content-Type', 'Content-Length', 'Accept-Encoding', 'X-CSRF-Token', 'Authorization', 'Access-Control-Allow-Credentials'],
+    allow_headers=['Content-Type', 'Authorization', 'Access-Control-Allow-Credentials', 'Access-Control-Allow-Origin'],
     supports_credentials=True,
     resources={
         # https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch#sending_a_request_with_credentials_included
@@ -57,8 +58,7 @@ CORS(
     },
 )
 # Check OPTIONS request:
-# curl -v -H "Authorization: Basic YXBpOnB1c3BsbmR2cWFpdmJ5bnY=" \
-# -X OPTIONS https://URL/api/v1.0/start
+# curl -v -H "Authorization: Basic YXBpOnB1c3BsbmR2cWFpdmJ5bnY=" -X OPTIONS https://URL/api/v1.0/start
 # Configure precise origins:
 # api_v1_cors_config = {
 #   "origins": ["http://localhost:5000"]
