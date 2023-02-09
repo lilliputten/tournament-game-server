@@ -132,8 +132,6 @@ config = {  # Default config
     # API
 
     'legalOrigins': [
-        'http://localhost:5000',  # Flask app -- only for isDev
-        'http://localhost:3000',  # Nextjs app -- only for isDev
         # Real endpoint addresses...
         'https://tournament-game-build.march.team/',
         'http://tournament-game-build.march.team/',
@@ -157,8 +155,9 @@ config = {  # Default config
 }
 
 
-if isDev:
-    config['legalOrigins'].append('http://localhost:3000')
+# if isDev:
+#     config['legalOrigins'].append('http://localhost:3000')
+#     config['legalOrigins'].append('http://localhost:5000')
 
 
 updateConfigWithYaml(config, yamlConfigFilename)

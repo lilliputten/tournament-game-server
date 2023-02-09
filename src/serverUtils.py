@@ -54,6 +54,7 @@ def makeErrorForRequest(errDict):
     url = errDict.get('url', request.url)
     method = errDict.get('method', request.method)
     protocol = errDict.get('protocol', request.scheme)
+    reason = errDict.get('reason', '')  # Only for dev mode?
     errorData = {
         'error': error,
         'code': code,
@@ -61,6 +62,7 @@ def makeErrorForRequest(errDict):
         'url': url,
         'method': method,
         'protocol': protocol,
+        'reason': reason,
         #  'repr': errorRepr,
     }
     DEBUG(getTrace(), {
@@ -125,7 +127,8 @@ def checkInvalidRequestError(checkToken=True):
     # Prepare parameters...
     origin = getOrigin()
     # If invalid origin then return error...
-    if origin is None or origin not in config['legalOrigins']:
+    legalOrigins = config['legalOrigins']
+    if origin is None or origin not in legalOrigins:
         return getBadRequestResponse('invalid request origin')
     if checkToken and not appSession.hasValidToken():
         return getBadRequestResponse('invalid token')
