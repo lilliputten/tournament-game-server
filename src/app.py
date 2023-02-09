@@ -34,8 +34,8 @@ app = Flask(__name__,
 app.secret_key = secret_key
 #  app.config['SESSION_TYPE'] = 'filesystem'
 app.config['SECRET_KEY'] = secret_key
-#  app.config['SESSION_COOKIE_SAMESITE'] = 'None'
-app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+app.config['SESSION_COOKIE_SAMESITE'] = 'None'
+# app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['CORS_HEADERS'] = 'Content-Type'
 
 
