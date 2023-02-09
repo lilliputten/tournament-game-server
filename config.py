@@ -89,7 +89,7 @@ config = {  # Default config
     'buildTag': buildTag,
 
     'errorSendCode': True,
-    'errorResponseType':'text',
+    'errorResponseType': 'text',
     #  'errorResponseType': 'json',
 
     # Path parameters...
