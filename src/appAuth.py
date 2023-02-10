@@ -14,6 +14,7 @@ auth = HTTPBasicAuth()
 
 DEBUG('@:appAuth: starting')
 
+
 @auth.verify_password
 def authenticate(username, password):
     DEBUG(getTrace(), {

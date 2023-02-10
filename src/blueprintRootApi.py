@@ -40,6 +40,7 @@ DEBUG('@:blueprintRootApi: starting', {
     'apiRoot': apiRoot,
 })
 
+
 @blueprintRootApi.route(apiRoot + '/start')  # , methods=['GET', 'OPTIONS'])
 @appAuth.auth.login_required
 #  @app.before_request
