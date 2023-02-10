@@ -21,3 +21,9 @@ AuthName tournament-game
 <Files ~ "^(manifest\.json)$">
 Satisfy any
 </Files>
+
+WSGIPassAuthorization On
+
+RewriteEngine on
+RewriteCond %{HTTP:Authorization} ^(.*)
+RewriteRule .* - [e=HTTP_AUTHORIZATION:%1]
