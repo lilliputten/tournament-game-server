@@ -154,8 +154,9 @@ config = {  # Default config
 
 }
 
+allowDebugOrigins = True
 
-if isDev:
+if allowDebugOrigins:
     config['legalOrigins'].append('http://localhost:3000')
     config['legalOrigins'].append('http://localhost:5000')
 
