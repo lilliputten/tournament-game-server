@@ -25,7 +25,7 @@
     "increment-version": "echo --Increment patch version-- && node util-increment-version.js",
     "update-build-time": "echo --Update build timestamp-- && node util-update-build-time.js",
     "update-build-variables": "echo --Update build properties-- && sh util-update-build-variables.sh",
-    "flask": "echo --Run python flask server (venv required)-- && cross-env FLASK_APP=src/server.py:app FLASK_ENV=development flask run",
+    "start": "echo --Run python flask server (venv required)-- && cross-env FLASK_APP=src/server.py:app FLASK_ENV=development flask run",
     "pytests": "echo --Run python tests (unittest, venv required)-- && python -m unittest discover -f -t . -s src -p *_test.py",
     "pylint-flake": "echo --Run python linter (flake8, venv required)-- && flake8 src",
     "pylint": "echo --Run python linter (pylint, venv required)-- && pylint index.py index.wsgi src",

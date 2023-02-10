@@ -47,7 +47,7 @@ On unix:
 Start local flask server (can be located in browser with `http://localhost:5000/*`, but mostly using for api requests):
 
 ```
-npm run flask
+npm run start
 ```
 
 Or just:
