@@ -18,7 +18,7 @@ clientStaticPath = config['clientStaticPath']
 clientTemplatePath = config['clientTemplatePath']
 clientStaticUrl = config['clientStaticUrl']
 
-DEBUG('@:app: starting (проба)', {
+DEBUG('@:app: starting', {
     'clientStaticPath': clientStaticPath,
     'clientTemplatePath': clientTemplatePath,
     'clientStaticUrl': clientStaticUrl,

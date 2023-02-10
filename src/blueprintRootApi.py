@@ -11,6 +11,7 @@ from flask import jsonify
 #  from flask import request
 #  from flask import session
 #  from flask_cors import cross_origin
+from flask_httpauth import HTTPBasicAuth
 
 from config import config
 from src import serverUtils
@@ -26,6 +27,9 @@ from src.core.lib.logger import (
 #  from src.core.lib import utils
 from src.core.lib.utils import getTrace
 from src import appSession
+from src import appAuth
+
+auth = HTTPBasicAuth()
 
 blueprintRootApi = Blueprint('blueprintRootApi', __name__)
 
@@ -36,8 +40,8 @@ DEBUG('@:blueprintRootApi: starting', {
     'apiRoot': apiRoot,
 })
 
-
 @blueprintRootApi.route(apiRoot + '/start')  # , methods=['GET', 'OPTIONS'])
+@appAuth.auth.login_required
 #  @app.before_request
 def blueprintRootApi_start():
     requestError = serverUtils.checkInvalidRequestError(checkToken=False)
