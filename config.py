@@ -89,8 +89,8 @@ config = {  # Default config
     'buildTag': buildTag,
 
     'errorSendCode': True,
-    'errorResponseType': 'text',
-    #  'errorResponseType': 'json',
+    #  'errorResponseType': 'text',
+    'errorResponseType': 'json',
 
     # Path parameters...
 
@@ -156,8 +156,8 @@ config = {  # Default config
 
 
 if isDev:
-   config['legalOrigins'].append('http://localhost:3000')
-   config['legalOrigins'].append('http://localhost:5000')
+    config['legalOrigins'].append('http://localhost:3000')
+    config['legalOrigins'].append('http://localhost:5000')
 
 
 updateConfigWithYaml(config, yamlConfigFilename)
