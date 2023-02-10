@@ -43,8 +43,8 @@ app.config['CORS_HEADERS'] = 'Content-Type'
 CORS(
     app,
     expose_headers='Authorization',
-    #  allow_headers=['Accept', 'Content-Type', 'Content-Length', 'Accept-Encoding', 'X-CSRF-Token', 'Authorization', 'Access-Control-Allow-Credentials'],
-    allow_headers=['Content-Type', 'Authorization', 'Access-Control-Allow-Credentials', 'Access-Control-Allow-Origin'],
+    allow_headers=['Accept', 'Content-Type', 'Content-Length', 'Accept-Encoding', 'X-CSRF-Token', 'Authorization', 'Access-Control-Allow-Credentials', 'Access-Control-Allow-Origin'],
+    #  allow_headers=['Content-Type', 'Authorization', 'Access-Control-Allow-Credentials', 'Access-Control-Allow-Origin'],
     supports_credentials=True,
     resources={
         # https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch#sending_a_request_with_credentials_included
