@@ -15,7 +15,7 @@ AuthGroupFile /home/g/goldenjeru/.security/.htgroups
 
 AuthType Basic
 AuthName tournament-game
-Require valid-user
+# Require valid-user
 # Require Group demo
 
 <Files ~ "^(manifest\.json)$">
