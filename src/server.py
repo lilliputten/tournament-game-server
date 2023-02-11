@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @module server
 # @since 2022.02.07, 00:27
-# @changed 2022.03.27, 20:37
+# @changed 2023.02.11, 22:30
 
 import os
 
@@ -29,10 +29,10 @@ if doInit:  # NOTE: Initializing only once (avoiding double initialization with 
     #  from flask import url_for
 
     from . import serverUtils
-    from .blueprintTest import blueprintTest
+    # from .blueprintTest import blueprintTest  # DEBUG
     from .blueprintCoreSite import blueprintCoreSite
     from .blueprintRootApi import blueprintRootApi
-    from .blueprintRequests import blueprintRequests
+    from .blueprintWaiting import blueprintWaiting
 
     DEBUG(getTrace('starting'), {
         'doInit': doInit,
@@ -50,10 +50,10 @@ if doInit:  # NOTE: Initializing only once (avoiding double initialization with 
 
     #  Register blueprint apis...
 
-    app.register_blueprint(blueprintTest)
+    # app.register_blueprint(blueprintTest)  # DEBUG
     app.register_blueprint(blueprintCoreSite)
     app.register_blueprint(blueprintRootApi)
-    app.register_blueprint(blueprintRequests)
+    app.register_blueprint(blueprintWaiting)
 
     # Errors handling...
 

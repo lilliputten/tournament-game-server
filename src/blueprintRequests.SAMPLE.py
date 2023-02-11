@@ -98,8 +98,7 @@ def blueprintRequests_add():
     DEBUG(getTrace(), resultData)
     # Make result...
     res = jsonify(resultData)
-    appSession.addExtendedSessionToResponse(res)
-    return res
+    return appSession.addExtendedSessionToResponse(res)
 
 
 __all__ = [  # Exporting objects...

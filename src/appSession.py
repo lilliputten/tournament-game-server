@@ -92,6 +92,15 @@ def addExtendedSessionToResponse(res):
     if Token:
         # TODO: Set samesite in dependency with response origin property?
         res.set_cookie('Token', Token, samesite='None', secure=True)
+    return res
+
+
+def set(id, value):
+    session[id] = value
+
+
+def get(id):
+    return session[id]
 
 
 __all__ = [  # Exporting objects...
@@ -101,6 +110,8 @@ __all__ = [  # Exporting objects...
     'hasValidToken',
     'getOrCreateToken',
     'addExtendedSessionToResponse',
+    'set',
+    'get',
 ]
 
 if __name__ == '__main__':

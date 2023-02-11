@@ -1,17 +1,16 @@
 # -*- coding:utf-8 -*-
 # @module blueprintRootApi
-# @desc Records API
+# @desc Root API
 # @since 2022.03.25, 18:57
-# @changed 2022.03.29, 22:46
+# @changed 2023.02.11, 22:06
 
 import datetime
 
 from flask import Blueprint
 from flask import jsonify
-#  from flask import request
+from flask import request
 #  from flask import session
 #  from flask_cors import cross_origin
-from flask_httpauth import HTTPBasicAuth
 
 from config import config
 from src import serverUtils
@@ -29,8 +28,6 @@ from src.core.lib.utils import getTrace
 from src import appSession
 from src import appAuth
 
-auth = HTTPBasicAuth()
-
 blueprintRootApi = Blueprint('blueprintRootApi', __name__)
 
 apiRoot = config['apiRoot']
@@ -41,9 +38,8 @@ DEBUG('@:blueprintRootApi: starting', {
 })
 
 
-@blueprintRootApi.route(apiRoot + '/start')  # , methods=['GET', 'OPTIONS'])
+@blueprintRootApi.route(apiRoot + '/start', methods=['GET'])
 @appAuth.auth.login_required
-#  @app.before_request
 def blueprintRootApi_start():
     requestError = serverUtils.checkInvalidRequestError(checkToken=False)
     if requestError:
@@ -69,13 +65,38 @@ def blueprintRootApi_start():
     }
     DEBUG(getTrace(), dict(requestData, **{'responseData': responseData}))
     res = jsonify(responseData)
-    appSession.addExtendedSessionToResponse(res)
-    return res
+    return appSession.addExtendedSessionToResponse(res)
+
+
+@blueprintRootApi.route(apiRoot + '/setName', methods=['POST'])
+@appAuth.auth.login_required
+def blueprintRootApi_setName():
+    # Check error...
+    requestError = serverUtils.checkInvalidRequestError(checkToken=True, checkRequestJsonData=True)
+    if requestError:
+        return requestError
+    # Get request data...
+    requestData = request.json
+    # Get name & store it to session...
+    if not requestData or 'name' not in requestData or not requestData['name']:
+        errStr = 'Not specified parameter `name`!'
+        raise Exception(errStr)
+    name = requestData['name']
+    appSession.set('name', name)
+    # Return success result...
+    responseData = {
+        'Token': appSession.getToken(),
+        'success': True,
+    }
+    DEBUG(getTrace(), dict(requestData, **{'responseData': responseData}))
+    res = jsonify(responseData)
+    return appSession.addExtendedSessionToResponse(res)
 
 
 __all__ = [  # Exporting objects...
     'blueprintRootApi',
 ]
+
 
 if __name__ == '__main__':
     DEBUG('@:blueprintRootApi: debug run')
