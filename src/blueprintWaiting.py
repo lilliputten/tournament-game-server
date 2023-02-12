@@ -72,6 +72,7 @@ def blueprintWaiting_waitingStart():
         'timestr': timestr,
         'ip': ip,
         #  'Token': Token,
+        'pairedToken': None,
     }
     # Add record item...
     waitingStorage.dbSync()
@@ -87,7 +88,7 @@ def blueprintWaiting_waitingStart():
     recordId = waitingStorage.addRecord(
         timestamp=timestamp,
         Token=Token,
-        data=data
+        data=data,
     )
     # TODO: Check result of db operation?
     waitingStorage.dbClose()

@@ -27,6 +27,7 @@ isGunicorn = bool(gunicornEnv)
 isRPi = isGunicorn
 isDev = flaskEnv == 'development'
 isProd = not isDev
+# TODO: Detect test environment
 
 rootPath = path.dirname(path.abspath(__file__))  # Project root path
 
