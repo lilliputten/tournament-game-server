@@ -22,11 +22,11 @@ from src.core.lib.logger import (
     getDateStr,
     getMsTimeStamp,
 )
-from src.core.lib.utils import getTrace, msTimeFromSec
+from src.core.lib.utils import getTrace
 from src import appSession
 from src import appAuth
 
-from src.core.Waiting.WaitingStorageSingleton import waitingStorage
+from src.core.Waiting import waitingStorage, WaitingConstants
 
 blueprintWaiting = Blueprint('blueprintWaiting', __name__)
 
@@ -36,9 +36,6 @@ DEBUG(getTrace('starting'), {
     'buildTag': config['buildTag'],
     'apiRoot': apiRoot,
 })
-
-# Time for wait for valid waitings (if not renewed)
-validWaitingPeriodMs = msTimeFromSec(20)
 
 
 # Serve blueprint..
@@ -77,7 +74,7 @@ def blueprintWaiting_waitingStart():
     # Add record item...
     waitingStorage.dbSync()
     # Create db query...
-    validTimestamp = timestamp - validWaitingPeriodMs
+    validTimestamp = timestamp - WaitingConstants.validWaitingPeriodMs
     q = Query()
     timeQuery = q.timestamp < validTimestamp  # Remove all obsolete records
     tokenQuery = q.Token == Token  # Remo all other records for this token
@@ -96,7 +93,6 @@ def blueprintWaiting_waitingStart():
     responseData = dict(data, **{
         'success': True,
         'recordId': recordId,
-        'Token': appSession.getToken(),
         # error?
     })
     #  # DEBUG: Emulate loooong request
@@ -104,6 +100,41 @@ def blueprintWaiting_waitingStart():
     #  time.sleep(5)
     DEBUG(getTrace(), {
         'requestData': requestData,
+        'responseData': responseData,
+        #  'removedRecords': removedRecords,
+        'removedRecordsCount': len(removedRecords),
+    })
+    res = jsonify(responseData)
+    return appSession.addExtendedSessionToResponse(res)
+
+
+@blueprintWaiting.route(apiRoot + '/waitingStop', methods=['POST'])
+@appAuth.auth.login_required
+def blueprintWaiting_waitingStop():
+    # Check error...
+    requestError = serverUtils.checkInvalidRequestError(checkToken=True, checkRequestJsonData=False)
+    if requestError:
+        return requestError
+    Token = appSession.getToken()
+    # Add record item...
+    waitingStorage.dbSync()
+    # Create db query...
+    timestamp = getMsTimeStamp(datetime.datetime.now())  # Get milliseconds timestamp (for technical usage)
+    validTimestamp = timestamp - WaitingConstants.validWaitingPeriodMs
+    q = Query()
+    timeQuery = q.timestamp < validTimestamp  # Remove all obsolete records
+    tokenQuery = q.Token == Token  # Remo all other records for this token
+    comboQuery = tokenQuery | timeQuery
+    # Remove all obsolete records and records with current token...
+    removedRecords = waitingStorage.removeRecords(comboQuery)
+    # TODO: Check result of db operation?
+    waitingStorage.dbClose()
+    # Return success result...
+    responseData = {
+        'success': True,
+        # error?
+    }
+    DEBUG(getTrace(), {
         'responseData': responseData,
         #  'removedRecords': removedRecords,
         'removedRecordsCount': len(removedRecords),

@@ -20,8 +20,6 @@ from src.core.lib.logger import (
 
 from src.core.lib.utils import getTrace
 
-#  from src.core import RecordsStorage
-
 isDev = config['isDev']
 useTimeStampInLastAccess = not isDev
 useSimplifiedSessionId = isDev
