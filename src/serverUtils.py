@@ -34,15 +34,14 @@ def makeErrorResponse(errorData):
     resCode = code if config['errorSendCode'] else 200
     if config['errorResponseType'] == 'json':  # json
         return jsonify(errorData), resCode
-    else:  # text
-        keys = errorData.keys()
-        result = ''
-        for key in keys:
-            val = errorData[key]
-            result += key + ': ' + str(val) + '\n'
-        return result, resCode, {
-            'Content-Type': 'text/plain; charset=utf-8',
-        }
+    keys = errorData.keys()
+    result = ''
+    for key in keys:
+        val = errorData[key]
+        result += key + ': ' + str(val) + '\n'
+    return result, resCode, {
+        'Content-Type': 'text/plain; charset=utf-8',
+    }
     #  return render_template('error-not-found.html', error=error), code
 
 

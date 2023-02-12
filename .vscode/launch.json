@@ -43,8 +43,8 @@
         "-f", // Stop on first fail
         // Specify python module path below...
         "src/core/Waiting/WaitingStorage_test.py",
-        // "-k", // Specify test match string below...
-        // "test_addedRecord",
+        "-k", // Specify test match string below...
+        "test_addObsoleteRecord",
       ],
     },
     {

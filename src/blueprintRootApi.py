@@ -82,7 +82,7 @@ def blueprintRootApi_setName():
         errStr = 'Not specified parameter `name`!'
         raise Exception(errStr)
     name = requestData['name']
-    appSession.set('name', name)
+    appSession.setVariable('name', name)
     # Return success result...
     responseData = {
         'Token': appSession.getToken(),

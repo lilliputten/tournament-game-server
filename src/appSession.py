@@ -95,12 +95,12 @@ def addExtendedSessionToResponse(res):
     return res
 
 
-def set(id, value):
-    session[id] = value
+def setVariable(key, value):
+    session[key] = value
 
 
-def get(id):
-    return session[id]
+def getVariable(key):
+    return session[key]
 
 
 __all__ = [  # Exporting objects...
@@ -110,8 +110,8 @@ __all__ = [  # Exporting objects...
     'hasValidToken',
     'getOrCreateToken',
     'addExtendedSessionToResponse',
-    'set',
-    'get',
+    'setVariable',
+    'getVariable',
 ]
 
 if __name__ == '__main__':

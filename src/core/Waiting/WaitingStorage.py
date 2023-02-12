@@ -28,6 +28,7 @@ from src.core.lib.logger import (
     #  getDateStr,
     getMsTimeStamp,
 )
+from src.core.lib import tinydbUtils
 from src.core.lib.utils import getTrace
 
 from src.core.Waiting import WaitingConstants
@@ -42,7 +43,7 @@ class WaitingStorage():
 
     testMode = None
 
-    hasDbChanges = False
+    # hasDbChanges = False  # UNUSED?
     db = None  # Database handler
 
     def __init__(self, testMode=False):
@@ -81,13 +82,13 @@ class WaitingStorage():
             raise err
 
     def getDbHandler(self):
-        if self.db is not None and self.db._opened:
+        if self.db is not None and tinydbUtils.isDbOpened(self.db):
             return self.db
         return self.dbOpen()
 
     def dbClose(self):
         if self.db is not None:
-            if self.db._opened:
+            if tinydbUtils.isDbOpened(self.db):
                 self.dbSave()
                 self.db.close()
             self.db = None
@@ -99,7 +100,13 @@ class WaitingStorage():
                 # False-positive pyright error. TODO?
                 self.db.storage.flush()  # type: ignore
             # self.db.commit()  # TODO: Check for hasDbChanges flag?
-            self.hasDbChanges = False
+            # self.hasDbChanges = False  #UNUSED?
+
+    def isOpened(self):
+        # Synchronyze memory data with disk data.
+        if self.db is not None and tinydbUtils.isDbOpened(self.db):
+            return True
+        return False
 
     def dbSync(self):
         # Synchronyze memory data with disk data.
@@ -178,17 +185,20 @@ class WaitingStorage():
             raise err
         return None
 
-    def findRecords(self, fragment):
+    def findRecords(self, query):
         """
-        `fragment`: data object with params:
+        `query`: query or fragment (data object with params):
         - `Token`: string,
         Returns found records list.
         """
         db = self.getDbHandler()
-        if fragment and db is not None:
+        if query and db is not None:
             try:
+                # Convert to query if fragment passed...
+                if not tinydbUtils.isQuery(query):
+                    query = Query().fragment(query)
                 # False-positive pyright error. TODO?
-                return db.search(Query().fragment(fragment))  # type: ignore
+                return db.search(query)  # type: ignore
             except Exception as err:
                 sTraceback = str(traceback.format_exc())
                 DEBUG(getTrace('catched error'), {

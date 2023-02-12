@@ -1,11 +1,15 @@
 # -*- coding:utf-8 -*-
 # @module utils
 # @since 2020.02.23, 02:18
-# @changed 2022.02.21, 22:21
+# @changed 2023.02.12, 16:51
 
 
 import traceback
 import re
+
+
+def msTimeFromSec(sec):
+    return sec * 1000
 
 
 def quoteStr(s, addQuotes=False, quoteDouble=False, quoteSingle=True):

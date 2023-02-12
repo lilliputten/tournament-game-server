@@ -11,6 +11,8 @@ from flask import Blueprint
 from flask import jsonify
 from flask import request
 
+from tinydb import Query
+
 from config import config
 
 from src import serverUtils
@@ -20,7 +22,7 @@ from src.core.lib.logger import (
     getDateStr,
     getMsTimeStamp,
 )
-from src.core.lib.utils import getTrace
+from src.core.lib.utils import getTrace, msTimeFromSec
 from src import appSession
 from src import appAuth
 
@@ -34,6 +36,9 @@ DEBUG(getTrace('starting'), {
     'buildTag': config['buildTag'],
     'apiRoot': apiRoot,
 })
+
+# Time for wait for valid waitings (if not renewed)
+validWaitingPeriodMs = msTimeFromSec(20)
 
 
 # Serve blueprint..
@@ -53,7 +58,7 @@ def blueprintWaiting_waitingStart():
         errStr = 'Not specified parameter `name`!'
         raise Exception(errStr)
     name = requestData['name']
-    appSession.set('name', name)
+    appSession.setVariable('name', name)
     # Prepare extra parameters...
     now = datetime.datetime.now()
     timestamp = getMsTimeStamp(now)  # Get milliseconds timestamp (for technical usage)
@@ -70,8 +75,15 @@ def blueprintWaiting_waitingStart():
     }
     # Add record item...
     waitingStorage.dbSync()
-    # TODO: Check for previously added record for this token
-    removedRecords = waitingStorage.removeRecords({'Token': Token})
+    # Create db query...
+    validTimestamp = timestamp - validWaitingPeriodMs
+    q = Query()
+    timeQuery = q.timestamp < validTimestamp  # Remove all obsolete records
+    tokenQuery = q.Token == Token  # Remo all other records for this token
+    comboQuery = tokenQuery | timeQuery
+    # Remove all obsolete records...
+    removedRecords = waitingStorage.removeRecords(comboQuery)
+    # Add updated record
     recordId = waitingStorage.addRecord(
         timestamp=timestamp,
         Token=Token,

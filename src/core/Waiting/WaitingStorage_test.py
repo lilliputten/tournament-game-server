@@ -10,21 +10,28 @@
 #  - `npm run -s python-tests -- -k WaitingStorage`
 #  - `python -m unittest -f src/core/Records/WaitingStorage_test.py`
 
+import datetime
 #  import time
 import unittest
 import functools
 
 from tinydb import Query
 
-from src.core.lib import utils
+#  from src.core.lib import utils
+# from src.core.lib.logger import DEBUG
+from src.core.lib.utils import getTrace
+from src.core.lib.logger import (
+    #  getDateStr,
+    getMsTimeStamp,
+)
 
 from .WaitingStorage import WaitingStorage
 
 
-print('\nRunning tests for', utils.getTrace())
+print('\nRunning tests for', getTrace())
 
 
-#  relevanceTime = 10
+relevanceTime = 10
 
 waitingStorage = WaitingStorage(testMode=True)
 
@@ -43,7 +50,7 @@ class Test_waitingStorage(unittest.TestCase):
         """
         Empty list must be returned for empty database.
         """
-        print('\nRunning test', utils.getTrace())
+        print('\nRunning test', getTrace())
         records = waitingStorage.getAllData()
         self.assertEqual(len(records), 0)
 
@@ -51,14 +58,14 @@ class Test_waitingStorage(unittest.TestCase):
         """
         Test initial (empty) state.
         """
-        print('\nRunning test', utils.getTrace())
+        print('\nRunning test', getTrace())
         self.assertEqual(waitingStorage.getRecordsCount(), 0)
 
-    def test_addedRecord(self):
+    def test_addRecord(self):
         """
         Test of data record adding.
         """
-        print('\nRunning test', utils.getTrace())
+        print('\nRunning test', getTrace())
         waitingStorage.addRecord(Token='test', data={'value': 'new record'})
         waitingStorage.dbSave()
         recordsCount = waitingStorage.getRecordsCount()
@@ -68,7 +75,7 @@ class Test_waitingStorage(unittest.TestCase):
         """
         Test of getting of records by parameter (`Token`).
         """
-        print('\nRunning test', utils.getTrace())
+        print('\nRunning test', getTrace())
         waitingStorage.addRecord(Token='test', data={'value': 'must be found'})
         waitingStorage.addRecord(Token='other', data={'value': 222})
         foundRecords = waitingStorage.findRecords({'Token': 'test'})
@@ -76,9 +83,9 @@ class Test_waitingStorage(unittest.TestCase):
 
     def test_findRecordsWithCustomFunc(self):
         """
-        Test of getting of records by custom comparator funciton.
+        Test of getting of records by custom comparator function.
         """
-        print('\nRunning test', utils.getTrace())
+        print('\nRunning test', getTrace())
         waitingStorage.addRecord(Token='test', data={'value': 'must be found'})
         waitingStorage.addRecord(Token='other', data={'value': 222})
 
@@ -96,7 +103,7 @@ class Test_waitingStorage(unittest.TestCase):
         """
         Test of removing of records by parameters (`Token`).
         """
-        print('\nRunning test', utils.getTrace())
+        print('\nRunning test', getTrace())
         waitingStorage.addRecord(Token='test', data={'value': 'must be found and removed'})
         waitingStorage.addRecord(Token='other', data={'value': 'must be remained'})
         waitingStorage.addRecord(Token='test', data={'value': 'must be found and removed'})
@@ -109,7 +116,7 @@ class Test_waitingStorage(unittest.TestCase):
         """
         Test of extracing (finding & removing) of records by parameters (`Token`).
         """
-        print('\nRunning test', utils.getTrace())
+        print('\nRunning test', getTrace())
         waitingStorage.addRecord(Token='test', data={'value': 'must be found and removed'})
         waitingStorage.addRecord(Token='other', data={'value': 'must be remained'})
         waitingStorage.addRecord(Token='test', data={'value': 'must be found and removed'})
@@ -135,6 +142,30 @@ class Test_waitingStorage(unittest.TestCase):
         remainedRecordsTest = functools.reduce(
             (lambda result, value: result and value == 'must be remained'), remainedRecordsValues, True)
         self.assertEqual(remainedRecordsTest, True)
+
+    def test_addObsoleteRecord(self):
+        """
+        Test of data record adding.
+        """
+        print('\nRunning test', getTrace())
+        now = datetime.datetime.now()
+        timestamp = getMsTimeStamp(now)  # Get milliseconds timestamp (for technical usage)
+        oldTimestamp = timestamp - relevanceTime
+        waitingStorage.addRecord(Token='test', timestamp=oldTimestamp, data={'value': 'old (should be removed)'})
+        waitingStorage.addRecord(Token='other', timestamp=timestamp, data={'value': 'new (should be preserved)'})
+        tokenFragment = {'Token': 'test'}
+        tokenQuery = Query().fragment(tokenFragment)
+        q = Query()
+        timeQuery = q.timestamp < timestamp
+        testQuery = tokenQuery | timeQuery
+        removedRecords = waitingStorage.extractRecords(testQuery)
+        waitingStorage.dbSave()
+        recordsCount = waitingStorage.getRecordsCount()
+        # Should remove old record and remain new
+        self.assertEqual(recordsCount, 1)
+        self.assertEqual(len(removedRecords), 1)
+        removedValue = removedRecords[0]['value']
+        self.assertEqual(removedValue, 'old (should be removed)')
 
 
 if __name__ == '__main__':
