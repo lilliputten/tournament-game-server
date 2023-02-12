@@ -41,6 +41,22 @@ DEBUG(getTrace('starting'), {
 # Serve blueprint..
 
 
+def getComboQuery(removeCurrentTokenRecords=False):
+    """
+    Create tinyDB query for fetching (removing) obsolete records and records
+    with current token (if flag `removeCurrentTokenRecords` passed).
+    """
+    timestamp = getMsTimeStamp(datetime.datetime.now())  # Get milliseconds timestamp (for technical usage)
+    validTimestamp = timestamp - WaitingConstants.validWaitingPeriodMs
+    q = Query()
+    query = q.timestamp < validTimestamp  # Remove all obsolete records
+    if removeCurrentTokenRecords:
+        Token = appSession.getToken()
+        # Remove all records with current token
+        query = (q.Token == Token) | query
+    return query
+
+
 @blueprintWaiting.route(apiRoot + '/waitingStart', methods=['POST'])
 @appAuth.auth.login_required
 def blueprintWaiting_waitingStart():
@@ -59,29 +75,22 @@ def blueprintWaiting_waitingStart():
     # Prepare extra parameters...
     now = datetime.datetime.now()
     timestamp = getMsTimeStamp(now)  # Get milliseconds timestamp (for technical usage)
-    timestr = getDateStr(now)
-    ip = request.remote_addr
     #  hasToken = appSession.hasToken()
-    Token = appSession.getOrCreateToken(getTrace())
     data = {
         'name': name,
         'timestamp': timestamp,
-        'timestr': timestr,
-        'ip': ip,
-        #  'Token': Token,
+        'timestr': getDateStr(now),
+        'ip': request.remote_addr,
         'pairedToken': None,
     }
     # Add record item...
     waitingStorage.dbSync()
     # Create db query...
-    validTimestamp = timestamp - WaitingConstants.validWaitingPeriodMs
-    q = Query()
-    timeQuery = q.timestamp < validTimestamp  # Remove all obsolete records
-    tokenQuery = q.Token == Token  # Remo all other records for this token
-    comboQuery = tokenQuery | timeQuery
+    comboQuery = getComboQuery(removeCurrentTokenRecords=True)
     # Remove all obsolete records...
     removedRecords = waitingStorage.removeRecords(comboQuery)
     # Add updated record
+    Token = appSession.getToken()
     recordId = waitingStorage.addRecord(
         timestamp=timestamp,
         Token=Token,
@@ -108,6 +117,31 @@ def blueprintWaiting_waitingStart():
     return appSession.addExtendedSessionToResponse(res)
 
 
+@blueprintWaiting.route(apiRoot + '/waitingCheck', methods=['POST'])
+@appAuth.auth.login_required
+def blueprintWaiting_waitingCheck():
+    # Check error...
+    requestError = serverUtils.checkInvalidRequestError(checkToken=True, checkRequestJsonData=False)
+    if requestError:
+        return requestError
+    # Add record item...
+    waitingStorage.dbSync()
+    # Find first waiting partner and if found, then create a new game...
+    # Return success result...
+    responseData = {
+        'success': True,
+        'status': 'waiting',  # waiting, finished, failed
+        #  'partnerName': 'xxx',
+        #  'partnerToken': 'xxx',
+        # error?
+    }
+    DEBUG(getTrace(), {
+        'responseData': responseData,
+    })
+    res = jsonify(responseData)
+    return appSession.addExtendedSessionToResponse(res)
+
+
 @blueprintWaiting.route(apiRoot + '/waitingStop', methods=['POST'])
 @appAuth.auth.login_required
 def blueprintWaiting_waitingStop():
@@ -115,16 +149,10 @@ def blueprintWaiting_waitingStop():
     requestError = serverUtils.checkInvalidRequestError(checkToken=True, checkRequestJsonData=False)
     if requestError:
         return requestError
-    Token = appSession.getToken()
     # Add record item...
     waitingStorage.dbSync()
     # Create db query...
-    timestamp = getMsTimeStamp(datetime.datetime.now())  # Get milliseconds timestamp (for technical usage)
-    validTimestamp = timestamp - WaitingConstants.validWaitingPeriodMs
-    q = Query()
-    timeQuery = q.timestamp < validTimestamp  # Remove all obsolete records
-    tokenQuery = q.Token == Token  # Remo all other records for this token
-    comboQuery = tokenQuery | timeQuery
+    comboQuery = getComboQuery(removeCurrentTokenRecords=True)
     # Remove all obsolete records and records with current token...
     removedRecords = waitingStorage.removeRecords(comboQuery)
     # TODO: Check result of db operation?

@@ -135,7 +135,6 @@ def checkInvalidRequestError(checkToken=True, checkRequestJsonData=False):
         requestData = request.json  # request.values
         if requestData is None or not requestData:
             return getBadRequestResponse('invalid request data')
-
     return None  # Success: No error -- we can to process this request further
 
 
