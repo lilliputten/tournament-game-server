@@ -111,20 +111,21 @@ class WaitingStorage():
             self.db.truncate()
 
     def getRecordsCount(self):
-        with self.getDbHandler() as db:
+        db = self.getDbHandler()
+        if db is not None:
             return len(db)
-        #  return 0
+        return 0
 
     def getAllData(self):
         #  DEBUG(getTrace())
         try:
-            with self.getDbHandler() as db:
-                if db is not None:
-                    result = db.all()
-                    #  DEBUG(getTrace('result'), {
-                    #      'result': result,
-                    #  })
-                    return result
+            db = self.getDbHandler()
+            if db is not None:
+                result = db.all()
+                #  DEBUG(getTrace('result'), {
+                #      'result': result,
+                #  })
+                return result
         except Exception as err:
             sTraceback = str(traceback.format_exc())
             DEBUG(getTrace('catched error'), {
@@ -154,17 +155,17 @@ class WaitingStorage():
             'timestamp': timestamp,
             'Token': Token,
         })
-        DEBUG(getTrace(), {
-            'dbData': dbData,
-            'data': data,
-        })
+        # DEBUG(getTrace(), {
+        #     'dbData': dbData,
+        #     'data': data,
+        # })
         try:
-            with self.getDbHandler() as db:
-                if db is not None:
-                    recordId = db.insert(dbData)
-                    #  if not self.testMode:
-                    #      WaitingMail.sendRecordMail(dbData)
-                    return recordId
+            db = self.getDbHandler()
+            if db is not None:
+                recordId = db.insert(dbData)
+                #  if not self.testMode:
+                #      WaitingMail.sendRecordMail(dbData)
+                return recordId
         except Exception as err:
             sTraceback = str(traceback.format_exc())
             DEBUG(getTrace('catched error'), {
@@ -183,18 +184,18 @@ class WaitingStorage():
         - `Token`: string,
         Returns found records list.
         """
-        with self.getDbHandler() as db:
-            if fragment and db is not None:
-                try:
-                    # False-positive pyright error. TODO?
-                    return db.search(Query().fragment(fragment))  # type: ignore
-                except Exception as err:
-                    sTraceback = str(traceback.format_exc())
-                    DEBUG(getTrace('catched error'), {
-                        'err': err,
-                        'traceback': sTraceback,
-                    })
-                    raise err
+        db = self.getDbHandler()
+        if fragment and db is not None:
+            try:
+                # False-positive pyright error. TODO?
+                return db.search(Query().fragment(fragment))  # type: ignore
+            except Exception as err:
+                sTraceback = str(traceback.format_exc())
+                DEBUG(getTrace('catched error'), {
+                    'err': err,
+                    'traceback': sTraceback,
+                })
+                raise err
         return []
 
     def extractRecords(self, fragment):
@@ -206,10 +207,10 @@ class WaitingStorage():
         records = self.findRecords(fragment)
         # Remove records
         if len(records):
-            with self.getDbHandler() as db:
-                if db is not None:
-                    ids = list(map(lambda rec: rec.doc_id, records))
-                    db.remove(doc_ids=ids)
+            db = self.getDbHandler()
+            if db is not None:
+                ids = list(map(lambda rec: rec.doc_id, records))
+                db.remove(doc_ids=ids)
         return records
 
     def removeRecords(self, fragment):

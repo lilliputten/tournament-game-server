@@ -42,12 +42,9 @@
       "args": [
         "-f", // Stop on first fail
         // Specify python module path below...
-        // "src/core/Records/RecordsStorage_test.py",
-        // "src/core/Requests/RequestsStorage_test.py",
-        "src/core/Requests/RequestsMail_test.py",
-        "-k", // Specify test match string below...
-        "test_sendRecordMail",
-        // "test_extractRecords",
+        "src/core/Waiting/WaitingStorage_test.py",
+        // "-k", // Specify test match string below...
+        // "test_addedRecord",
       ],
     },
     {
