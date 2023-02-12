@@ -1,9 +1,9 @@
 <!--
  @since 2023.02.09, 16:49
- @changed 2023.02.09, 16:49
+ @changed 2023.02.13, 01:28
 -->
 
-# MarchTeam backend server
+# Tournament game backend server
 
 
 ## Build info (auto-generated)
@@ -66,7 +66,8 @@ TODO: Describe api here (for specific server version)
 
 ## Server urls
 
-Remote server: `http://march-team-flask-site.march.team/`
+Remote server: `https://tournament-game.march.team/`
+Remote server: `https://tournament-game-build.march.team/` (with built app)
 
 
 ## Server

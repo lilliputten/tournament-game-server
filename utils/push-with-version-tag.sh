@@ -1,8 +1,9 @@
 #!/bin/sh
 # @desc Create/update version tag (from build folder)
-# @since 2020.12.30, 20:24
-# @changed 2022.01.03, 19:58
+# @since 2023.01.26, 16:43
+# @changed 2023.01.26, 16:43
 
+# Import config variables (expected variables `$DIST_REPO` and `$PUBLISH_FOLDER`)...
 test -f "./utils/config.sh" && . "./utils/config.sh"
 test -f "./utils/config-local.sh" && . "./utils/config-local.sh"
 
@@ -22,4 +23,5 @@ VERSION=`cat "$VERSIONFILE"`
 echo "Create/update tag $SRC_TAG_PREFIX.$VERSION..." \
   && git tag -f "$SRC_TAG_PREFIX.$VERSION" \
   && git push origin -f --tags \
+  && git pull origin \
   && echo "OK"

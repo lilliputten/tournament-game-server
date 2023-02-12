@@ -14,7 +14,7 @@ PYTHON_RUNTIME="python"
 #   PYTHON_RUNTIME="C:/Python39/python.exe"
 # fi
 
-SRC_TAG_PREFIX="v." # "v" for default "v.X.Y.Z"
+SRC_TAG_PREFIX="v" # "v" for default "v.X.Y.Z"
 
 # TODO: To use generic `init-crossplatform-command-names.sh`
 FINDCMD="find"
