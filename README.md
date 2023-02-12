@@ -8,9 +8,9 @@
 
 ## Build info (auto-generated)
 
-- Version: 0.0.0
-- Last changes timestamp: 2023.02.09, 17:01
-- Last changes timetag: 230209-1701
+- Version: 0.0.1
+- Last changes timestamp: 2023.02.13, 01:15
+- Last changes timetag: 230213-0115
 
 
 ## Install
