@@ -13,6 +13,11 @@
 - Last changes timetag: 230213-0115
 
 
+## TODO
+
+Describe used techologies & their relations.
+
+
 ## Install
 
 Install all required node dependencies:

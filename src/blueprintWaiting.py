@@ -15,7 +15,7 @@ from tinydb import Query
 
 from config import config
 
-from src import serverUtils
+from src.core.lib import serverUtils
 
 from src.core.lib.logger import DEBUG
 from src.core.lib.logger import (
@@ -131,6 +131,7 @@ def blueprintWaiting_waitingCheck():
     responseData = {
         'success': True,
         'status': 'waiting',  # waiting, finished, failed
+        #  'gameId': 'xxx',
         #  'partnerName': 'xxx',
         #  'partnerToken': 'xxx',
         # error?

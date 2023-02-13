@@ -1,10 +1,8 @@
 # -*- coding:utf-8 -*-
 # @module appSession
 # @since 2022.02.07, 00:27
-# @changed 2023.02.10, 01:41
+# @changed 2023.02.13, 13:35
 
-import uuid
-import random
 import datetime
 
 from flask import session
@@ -17,12 +15,12 @@ from src.core.lib.logger import (
     getMsDateTag,
     getMsTimeStamp,
 )
+from src.core.lib.uniqueToken import createUniqueToken
 
 from src.core.lib.utils import getTrace
 
 isDev = config['isDev']
 useTimeStampInLastAccess = not isDev
-useSimplifiedSessionId = isDev
 
 
 def getToken():
@@ -61,14 +59,11 @@ def getOrCreateToken(callerId=''):
     timestamp = getMsTimeStamp(now)  # Get milliseconds timestamp (for technical usage)
     dateTag = getMsDateTag(now)
     if not Token:
-        # Create random token id (simple for dev mode or uuid for production)
-        sesseionIdValue = random.randint(100000, 10000000) if useSimplifiedSessionId else uuid.uuid4()
-        # Compose token value using date tag and unique id; TODO: Use PyJWT encoding?
-        Token = dateTag + '-' + str(sesseionIdValue)
+        # Create random token id...
+        Token = createUniqueToken()
         DEBUG(getTrace('new session id'), {
             'callerId': callerId,
             'Token': Token,
-            #  'sessionIdObj': sessionIdObj,
         })
         session['Token'] = Token
         session['sessionNew'] = True
@@ -78,7 +73,6 @@ def getOrCreateToken(callerId=''):
             'Token': Token,
         })
         session['sessionNew'] = False
-    #  sessionLastAccess = str(timestamp) + ' ' + dateTag
     sessionLastAccess = (str(timestamp) + ' ' if useTimeStampInLastAccess else '') + dateTag
     session['sessionLastAccess'] = sessionLastAccess
     return Token

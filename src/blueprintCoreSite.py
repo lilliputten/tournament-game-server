@@ -16,7 +16,7 @@ from flask import render_template  # Used for `blueprintCoreSite_root_hello`
 
 from config import config
 
-from src import serverUtils
+from src.core.lib import serverUtils
 
 from src.core.lib.logger import DEBUG
 from src.core.lib.utils import getTrace

@@ -28,7 +28,7 @@ if doInit:  # NOTE: Initializing only once (avoiding double initialization with 
     #  from flask import request
     #  from flask import url_for
 
-    from . import serverUtils
+    from src.core.lib import serverUtils
     # from .blueprintTest import blueprintTest  # DEBUG
     from .blueprintCoreSite import blueprintCoreSite
     from .blueprintRootApi import blueprintRootApi
