@@ -42,6 +42,7 @@ DEBUG(getTrace('starting'), {
 @blueprintWaiting.route(apiRoot + '/waitingStart', methods=['POST'])
 @appAuth.auth.login_required
 def blueprintWaiting_waitingStart():
+    appSession.removeVariable('gameToken')
     # Check error...
     requestError = serverUtils.checkInvalidRequestError(checkToken=True, checkRequestJsonData=True)
     if requestError:
@@ -119,6 +120,7 @@ def blueprintWaiting_waitingCheck():
 @blueprintWaiting.route(apiRoot + '/waitingStop', methods=['POST'])
 @appAuth.auth.login_required
 def blueprintWaiting_waitingStop():
+    appSession.removeVariable('gameToken')
     # Check error...
     requestError = serverUtils.checkInvalidRequestError(checkToken=True, checkRequestJsonData=False)
     if requestError:

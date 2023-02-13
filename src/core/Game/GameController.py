@@ -8,6 +8,7 @@
 from datetime import datetime
 from tinydb import Query
 from tinydb.table import Document
+from src import appSession
 from src.core.lib.Storage import Storage
 
 from src.core.lib.logger import DEBUG, getDateStr, getMsTimeStamp
@@ -77,6 +78,8 @@ class GameController(Storage):
                 'gameTimeStr': currentTimeStr,
             })
             DEBUG(getTrace('Record already have game token -> finished'), responseData)
+            # Store session token to session
+            appSession.setVariable('gameToken', selfRecord['gameToken'])
             return responseData
 
         # Check timeout...
@@ -188,6 +191,9 @@ class GameController(Storage):
             'gameRecordId': gameRecordId,
         })
         DEBUG(getTrace('Found partners -> start game'), responseData)
+
+        # Store session token to session
+        appSession.setVariable('gameToken', gameToken)
 
         return responseData
 

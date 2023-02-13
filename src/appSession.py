@@ -84,6 +84,10 @@ def addExtendedSessionToResponse(res):
     if Token:
         # TODO: Set samesite in dependency with response origin property?
         res.set_cookie('Token', Token, samesite='None', secure=True)
+    gameToken = session.get('gameToken', '')  # getOrCreateToken('addExtendedSessionToResponse')
+    if gameToken:
+        # TODO: Set samesite in dependency with response origin property?
+        res.set_cookie('gameToken', gameToken, samesite='None', secure=True)
     return res
 
 
@@ -95,6 +99,10 @@ def getVariable(key):
     return session[key]
 
 
+def removeVariable(key):
+    session.pop(key, default=None)
+
+
 __all__ = [  # Exporting objects...
     #  'session',
     'getToken',
@@ -104,6 +112,7 @@ __all__ = [  # Exporting objects...
     'addExtendedSessionToResponse',
     'setVariable',
     'getVariable',
+    'removeVariable',
 ]
 
 if __name__ == '__main__':
