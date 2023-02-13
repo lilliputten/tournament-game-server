@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @module appSession
 # @since 2022.02.07, 00:27
-# @changed 2023.02.13, 13:35
+# @changed 2023.02.13, 23:26
 
 import datetime
 
@@ -21,6 +21,32 @@ from src.core.lib.utils import getTrace
 
 isDev = config['isDev']
 useTimeStampInLastAccess = not isDev
+
+
+def getGameToken():
+    return session.get('gameToken')
+
+
+def hasGameToken():
+    return bool(getGameToken())
+
+
+def hasValidGameToken():
+    sessionGameToken = session.get('gameToken')
+    cookies = request.cookies
+    cookieGameToken = cookies.get('gameToken')
+    DEBUG(getTrace(), {
+        'sessionGameToken': sessionGameToken,
+        'cookieGameToken': cookieGameToken,
+        #  'cookies': cookies,
+    })
+    if sessionGameToken is None or not sessionGameToken:
+        return False
+    if cookieGameToken is None or not cookieGameToken:
+        return False
+    if sessionGameToken != cookieGameToken:
+        return False
+    return True
 
 
 def getToken():

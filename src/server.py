@@ -33,6 +33,7 @@ if doInit:  # NOTE: Initializing only once (avoiding double initialization with 
     from .blueprintCoreSite import blueprintCoreSite
     from .blueprintRootApi import blueprintRootApi
     from .blueprintWaiting import blueprintWaiting
+    from .blueprintGameSession import blueprintGameSession
 
     DEBUG(getTrace('starting'), {
         'doInit': doInit,
@@ -54,6 +55,7 @@ if doInit:  # NOTE: Initializing only once (avoiding double initialization with 
     app.register_blueprint(blueprintCoreSite)
     app.register_blueprint(blueprintRootApi)
     app.register_blueprint(blueprintWaiting)
+    app.register_blueprint(blueprintGameSession)
 
     # Errors handling...
 
@@ -68,8 +70,4 @@ if doInit:  # NOTE: Initializing only once (avoiding double initialization with 
 
 if __name__ == '__main__':
     app.secret_key = 'hjAR5HUzijG04RJP3XIqUyy6M4IZhBrQ'
-    #  print('server:__main__')
-    #  app.logger.debug('test log')
-    # app.debug = True
-    #  if os.environ.get("WERKZEUG_RUN_MAIN") == "true":
     app.run()

@@ -2,7 +2,7 @@
 # @module serverUtils
 # @desc Helper soutines for server.
 # @since 2022.02.12, 02:41
-# @changed 2023.02.10, 00:57
+# @changed 2023.02.13, 23:26
 
 import traceback
 
@@ -122,19 +122,21 @@ def getBadRequestResponse(reason):
     return makeErrorForRequest(errorData)
 
 
-def checkInvalidRequestError(checkToken=True, checkRequestJsonData=False):
+def checkInvalidRequestError(checkToken=True, checkGameToken=False, checkRequestJsonData=False):
     # Prepare parameters...
     origin = getOrigin()
     # If invalid origin then return error...
     legalOrigins = config['legalOrigins']
     if origin is None or origin not in legalOrigins:
-        return getBadRequestResponse('invalid request origin')
+        return getBadRequestResponse('Invalid request origin')
     if checkToken and not appSession.hasValidToken():
-        return getBadRequestResponse('invalid token')
+        return getBadRequestResponse('Invalid token')
+    if checkGameToken and not appSession.hasValidGameToken():
+        return getBadRequestResponse('Invalid gameToken')
     if checkRequestJsonData:
         requestData = request.json  # request.values
         if requestData is None or not requestData:
-            return getBadRequestResponse('invalid request data')
+            return getBadRequestResponse('Invalid request data')
     return None  # Success: No error -- we can to process this request further
 
 

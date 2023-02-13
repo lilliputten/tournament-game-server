@@ -1,11 +1,15 @@
 # -*- coding:utf-8 -*-
 # @module utils
 # @since 2020.02.23, 02:18
-# @changed 2023.02.12, 16:51
+# @changed 2023.02.13, 23:51
 
 
 import traceback
 import re
+
+
+def empty(var):
+    return not var and var is None
 
 
 def msTimeFromSec(sec):
@@ -88,10 +92,13 @@ def getTrace(appendStr=None):
     return traceResult
 
 
-#  __all__ = [  # Exporting objects...
-#      'quoteStr',
-#      'dictFromClass',
-#      'truncateLongString',
-#      'prepareLongString',
-#      'getTrace',
-#  ]
+__all__ = [  # Exporting objects...
+    'empty',
+    'msTimeFromSec',
+    'msTimeFromMin',
+    'quoteStr',
+    'dictFromClass',
+    'truncateLongString',
+    'prepareLongString',
+    'getTrace',
+]

@@ -2,7 +2,7 @@
 # @module GameController
 # @desc Game controller utils
 # @since 2023.02.13, 13:52
-# @changed 2023.02.13, 18:32
+# @changed 2023.02.13, 23:31
 
 
 from datetime import datetime
@@ -13,7 +13,7 @@ from src.core.lib.Storage import Storage
 
 from src.core.lib.logger import DEBUG, getDateStr, getMsTimeStamp
 from src.core.lib.uniqueToken import createUniqueToken
-from src.core.lib.utils import getTrace
+from src.core.lib.utils import empty, getTrace
 
 from src.core.Waiting import waitingStorage, WaitingConstants
 
@@ -28,17 +28,30 @@ class GameController(Storage):
     def __init__(self, testMode=False):
         self.testMode = testMode
 
-    def tryStartGame(self, Token):
-        waitingStorage.dbSync()
-        #  # Remove obsolete records...
-        #  comboQuery = WaitingHelpers.getValidRecordQuery()
-        #  # Remove all obsolete records and records with current token...
-        #  removedRecords = waitingStorage.removeRecords(comboQuery)
+    def getGameData(self, gameToken):
+        # Get game data...
+        q = Query()
+        query = (q.Token == gameToken)
+        foundGame = gameStorage.findFirstRecord(query)
+        return foundGame
 
+    def getCurrentGameData(self):
+        gameToken = appSession.getVariable('gameToken')
+        # Remove obsolete (timeouted) games or games with involved tokens...
+        q = Query()
+        query = (q.Token == gameToken)
+        foundGame = gameStorage.findFirstRecord(query)
+        return foundGame
+
+    def tryStartGame(self):
         # Prepare params...
+        Token = appSession.getToken()
         now = datetime.now()
         currentTimestamp = getMsTimeStamp(now)  # Get milliseconds timestamp (for technical usage)
         currentTimeStr = getDateStr(now)
+
+        waitingStorage.dbSync()
+        gameStorage.dbSync()
 
         # Find first waiting partner and if found, then create a new game...
         q = Query()
@@ -80,6 +93,8 @@ class GameController(Storage):
             DEBUG(getTrace('Record already have game token -> finished'), responseData)
             # Store session token to session
             appSession.setVariable('gameToken', selfRecord['gameToken'])
+            appSession.setVariable('partnerToken', selfRecord['partnerToken'])
+            appSession.setVariable('partnerName', selfRecord['partnerName'])  # XXX: Is it dangerous?
             return responseData
 
         # Check timeout...
@@ -194,7 +209,53 @@ class GameController(Storage):
 
         # Store session token to session
         appSession.setVariable('gameToken', gameToken)
+        appSession.setVariable('partnerToken', partnerToken)
+        appSession.setVariable('partnerName', partnerName)  # XXX: Is it dangerous?
 
+        return responseData
+
+    def startGameSession(self):
+        # Prepare data...
+        Token = appSession.getToken()
+        gameToken = appSession.getGameToken()
+        partnerToken = appSession.getVariable('partnerToken')
+        partnerName = appSession.getVariable('partnerName')
+        #  gameRecord = gameController.getGameData(gameToken=gameToken)
+
+        # Empty parameters?
+        if empty(Token) or empty(gameToken) or empty(partnerToken) or empty(partnerName):
+            # No self record found -> error
+            responseData = {
+                # Params...
+                'Token': Token,
+                'gameToken': gameToken,
+                'partnerToken': partnerToken,
+                'partnerName': partnerName,
+
+                # Status...
+                'success': True,
+                'status': 'failed',
+                'reason': 'Error',
+                'error': 'One of required parameters is empty',
+            }
+            DEBUG(getTrace('One of required parameters is empty -> error'), responseData)
+            return responseData
+
+        responseData = {
+            # Params...
+            'Token': Token,
+            'gameToken': gameToken,
+            'partnerToken': partnerToken,
+            'partnerName': partnerName,
+
+            # Status...
+            'success': True,
+            'status': 'playing',
+            'reason': 'Game started',
+            # error?
+        }
+
+        DEBUG(getTrace('success'), responseData)
         return responseData
 
 

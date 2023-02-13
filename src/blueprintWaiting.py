@@ -109,7 +109,7 @@ def blueprintWaiting_waitingCheck():
         return requestError
     # Try start game session...
     Token = appSession.getToken()
-    responseData = gameController.tryStartGame(Token=Token)
+    responseData = gameController.tryStartGame()
     DEBUG(getTrace(), {
         'responseData': responseData,
     })
