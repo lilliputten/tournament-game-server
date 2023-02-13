@@ -43,7 +43,8 @@ DEBUG(getTrace('starting'), {
 @appAuth.auth.login_required
 def blueprintGameSession_gameSessionStart():
     # Start error...
-    requestError = serverUtils.checkInvalidRequestError(checkToken=True, checkGameToken=True, checkRequestJsonData=False)
+    requestError = serverUtils.checkInvalidRequestError(
+        checkToken=True, checkGameToken=True, checkRequestJsonData=False)
     if requestError:
         return requestError
 
