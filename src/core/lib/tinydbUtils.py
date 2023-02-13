@@ -24,5 +24,6 @@ def isQuery(obj):
 
 
 __all__ = [  # Exporting objects...
+    'isDbOpened',
     'isQuery',
 ]

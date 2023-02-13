@@ -137,10 +137,16 @@ class Storage():
         - data (dict)
         Returns created record id (from tinydb).
         """
+        # Check Token...
+        if Token is None or not Token:
+            if data and data is not None and 'Token' in data and data['Token'] is not None:
+                Token = data['Token']
         # Automatically set timestamp if absent?
         if timestamp is None or not timestamp:
-            now = datetime.datetime.now()
-            timestamp = getMsTimeStamp(now)  # Get milliseconds timestamp (for technical usage)
+            if data and data is not None and 'timestamp' in data and data['timestamp'] is not None:
+                timestamp = data['timestamp']
+            else:
+                timestamp = getMsTimeStamp(datetime.datetime.now())  # Get milliseconds timestamp (for technical usage)
         if not data or data is None:
             data = {}
         dbData = dict(data, **{
@@ -184,6 +190,17 @@ class Storage():
                 })
                 raise err
         return []
+
+    def findFirstRecord(self, query):
+        """
+        `query`: query or fragment (data object with params):
+        - `Token`: string,
+        Get first found record.
+        """
+        records = self.findRecords(query)
+        if len(records):
+            return records[0]
+        return None
 
     def extractRecords(self, fragment):
         """

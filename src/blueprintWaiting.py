@@ -5,13 +5,10 @@
 # @changed 2023.02.12, 00:50
 
 import datetime
-# import time
 
 from flask import Blueprint
 from flask import jsonify
 from flask import request
-
-from tinydb import Query
 
 from config import config
 
@@ -26,7 +23,8 @@ from src.core.lib.utils import getTrace
 from src import appSession
 from src import appAuth
 
-from src.core.Waiting import waitingStorage, WaitingConstants
+from src.core.Waiting import waitingStorage, WaitingHelpers
+from src.core.Game import gameController
 
 blueprintWaiting = Blueprint('blueprintWaiting', __name__)
 
@@ -39,22 +37,6 @@ DEBUG(getTrace('starting'), {
 
 
 # Serve blueprint..
-
-
-def getComboQuery(removeCurrentTokenRecords=False):
-    """
-    Create tinyDB query for fetching (removing) obsolete records and records
-    with current token (if flag `removeCurrentTokenRecords` passed).
-    """
-    timestamp = getMsTimeStamp(datetime.datetime.now())  # Get milliseconds timestamp (for technical usage)
-    validTimestamp = timestamp - WaitingConstants.validWaitingPeriodMs
-    q = Query()
-    query = q.timestamp < validTimestamp  # Remove all obsolete records
-    if removeCurrentTokenRecords:
-        Token = appSession.getToken()
-        # Remove all records with current token
-        query = (q.Token == Token) | query
-    return query
 
 
 @blueprintWaiting.route(apiRoot + '/waitingStart', methods=['POST'])
@@ -81,12 +63,12 @@ def blueprintWaiting_waitingStart():
         'timestamp': timestamp,
         'timestr': getDateStr(now),
         'ip': request.remote_addr,
-        'pairedToken': None,
     }
     # Add record item...
     waitingStorage.dbSync()
     # Create db query...
-    comboQuery = getComboQuery(removeCurrentTokenRecords=True)
+    Token = appSession.getToken()
+    comboQuery = WaitingHelpers.getValidRecordQuery(removeCurrentTokenRecords=True, Token=Token)
     # Remove all obsolete records...
     removedRecords = waitingStorage.removeRecords(comboQuery)
     # Add updated record
@@ -124,18 +106,9 @@ def blueprintWaiting_waitingCheck():
     requestError = serverUtils.checkInvalidRequestError(checkToken=True, checkRequestJsonData=False)
     if requestError:
         return requestError
-    # Add record item...
-    waitingStorage.dbSync()
-    # Find first waiting partner and if found, then create a new game...
-    # Return success result...
-    responseData = {
-        'success': True,
-        'status': 'waiting',  # waiting, finished, failed
-        #  'gameId': 'xxx',
-        #  'partnerName': 'xxx',
-        #  'partnerToken': 'xxx',
-        # error?
-    }
+    # Try start game session...
+    Token = appSession.getToken()
+    responseData = gameController.tryStartGame(Token=Token)
     DEBUG(getTrace(), {
         'responseData': responseData,
     })
@@ -153,7 +126,8 @@ def blueprintWaiting_waitingStop():
     # Add record item...
     waitingStorage.dbSync()
     # Create db query...
-    comboQuery = getComboQuery(removeCurrentTokenRecords=True)
+    Token = appSession.getToken()
+    comboQuery = WaitingHelpers.getValidRecordQuery(removeCurrentTokenRecords=True, Token=Token)
     # Remove all obsolete records and records with current token...
     removedRecords = waitingStorage.removeRecords(comboQuery)
     # TODO: Check result of db operation?

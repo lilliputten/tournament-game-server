@@ -11,7 +11,7 @@ from src.core.lib import utils
 dbName = 'Waiting'  # Relative to `config['dbPath']`
 
 # Time for wait for valid waitings (if not renewed)
-validWaitingPeriodMs = utils.msTimeFromMin(1)
+validWaitingPeriodMs = utils.msTimeFromMin(10)
 
 
 __all__ = [  # Exporting objects...
