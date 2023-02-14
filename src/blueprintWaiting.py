@@ -2,9 +2,9 @@
 # @module blueprintWaiting
 # @desc Waiting for game start API
 # @since 2023.02.11, 22:03
-# @changed 2023.02.12, 00:50
+# @changed 2023.02.14, 21:04
 
-import datetime
+from datetime import datetime
 
 from flask import Blueprint
 from flask import jsonify
@@ -49,87 +49,15 @@ def blueprintWaiting_waitingStart():
     requestError = serverUtils.checkInvalidRequestError(checkToken=True, checkRequestJsonData=True)
     if requestError:
         return requestError
-    # Get request data...
-    requestData = request.json
-    # Get name & store it to session...
-    if not requestData or 'name' not in requestData or not requestData['name']:
-        errStr = 'Not specified parameter `name`!'
-        raise Exception(errStr)
-    name = requestData['name']
-    appSession.setVariable('name', name)
-    # Prepare extra parameters...
-    now = datetime.datetime.now()
-    timestamp = getMsTimeStamp(now)  # Get milliseconds timestamp (for technical usage)
-    #  timestr = getDateStr(now)
-    # Prepare data...
-    data = {
-        'name': name,
-        'timestamp': timestamp,
-        'timestr': getDateStr(now),
-        'ip': request.remote_addr,
-    }
-    #  hasToken = appSession.hasToken()
-    Token = appSession.getToken()
-    waitingStorage.dbSync()
-    # Try to find active record
-    # findQuery = WaitingHelpers.getValidRecordQuery(Token=Token)
-    q = Query()
-    query = (q.timestamp >= timestamp - WaitingConstants.validWaitingPeriodMs) & (q.Token == Token) & (q.gameToken.exists())  # & (q.gameToken is not None)
-    foundRecord = waitingStorage.findFirstRecord(query)
-    DEBUG(getTrace('DEBUG findQuery'), {
-        'foundRecord': foundRecord,
-        #  'removedRecords': removedRecords,
-    })
-    # Has active game?
-    if foundRecord:  # and 'gameToken' in foundRecord and not hasNotEmpty(foundRecord, 'gameToken'):
-        responseData = dict(data, **{
-            'success': True,
-            'reason': 'Already have active game',
-            'gameToken': foundRecord['gameToken'],
-            #  'recordId': foundRecord['doc_id'],
-            # error?
-        })
-    else:
-        # Remove all obsolete records...
-        removeQuery = WaitingHelpers.getInvalidRecordQuery(findInvalidRecords=True, Token=Token)
-        removedRecords = waitingStorage.removeRecords(removeQuery)
-        if len(removedRecords):
-            DEBUG(getTrace('Removed records'), {
-                'removedRecords': removedRecords,
-                'removedRecordsCount': len(removedRecords),
-            })
-        # Update or add record
-        # db = waitingStorage.getDbHandler()
-        #  # TODO: upsert
-        #  recordData = {
-        #      'timestamp': timestamp,
-        #      'timestr': timestr,
-        #      'Token': Token,
-        #      'data': data,
-        #  }
-        #  q = Query()
-        #  db.upsert(Document(recordData, q.Token == Token))
-        recordId = waitingStorage.addRecord(
-            timestamp=timestamp,
-            Token=Token,
-            data=data,
-        )
-        # TODO: Check result of db operation?
-        waitingStorage.dbClose()
-        # Return success result...
-        responseData = dict(data, **{
-            'success': True,
-            'recordId': recordId,
-            # error?
-        })
+
+    responseData = gameController.doWaitingStart(request)
+
     #  # DEBUG: Emulate loooong request
     #  DEBUG(getTrace(), {'info': 'start waiting'})
     #  time.sleep(5)
+
     DEBUG(getTrace(), {
-        'requestData': requestData,
         'responseData': responseData,
-        #  'removedRecords': removedRecords,
-        # 'removedRecordsCount': len(removedRecords),
     })
     res = jsonify(responseData)
     return appSession.addExtendedSessionToResponse(res)
@@ -144,7 +72,7 @@ def blueprintWaiting_waitingCheck():
         return requestError
     # Try start game session...
     # Token = appSession.getToken()
-    responseData = gameController.tryStartGame()
+    responseData = gameController.doWaitingCheck()
     DEBUG(getTrace(), {
         'responseData': responseData,
     })
