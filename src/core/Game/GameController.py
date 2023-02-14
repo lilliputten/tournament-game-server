@@ -106,7 +106,11 @@ class GameController(Storage):
 
         # Try to find active record
         q = Query()
-        query = (q.timestamp >= timestamp - WaitingConstants.validWaitingPeriodMs) & (q.Token == Token) & (q.gameToken.exists())  # & (q.gameToken is not None)
+        query = (
+            q.timestamp >= timestamp -
+            WaitingConstants.validWaitingPeriodMs) & (
+            q.Token == Token) & (
+            q.gameToken.exists())  # & (q.gameToken is not None)
         foundRecord = waitingStorage.findFirstRecord(query)
         DEBUG(getTrace('DEBUG findQuery'), {
             'foundRecord': foundRecord,
