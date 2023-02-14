@@ -34,6 +34,7 @@ if doInit:  # NOTE: Initializing only once (avoiding double initialization with 
     from .blueprintRootApi import blueprintRootApi
     from .blueprintWaiting import blueprintWaiting
     from .blueprintGameSession import blueprintGameSession
+    from .blueprintQuestions import blueprintQuestions
 
     DEBUG(getTrace('starting'), {
         'doInit': doInit,
@@ -56,6 +57,7 @@ if doInit:  # NOTE: Initializing only once (avoiding double initialization with 
     app.register_blueprint(blueprintRootApi)
     app.register_blueprint(blueprintWaiting)
     app.register_blueprint(blueprintGameSession)
+    app.register_blueprint(blueprintQuestions)
 
     # Errors handling...
 

@@ -1,0 +1,11 @@
+questions:
+  - question: 'Question 1'
+    answers:
+      - text: 'Answer text 1'
+      - text: 'Answer text 2'
+        correct: True
+      - text: 'Answer text 3'
+  - question: 'Question 2'
+    answers:
+      - text: 'Answer text 1'
+      - text: 'Answer text 2'

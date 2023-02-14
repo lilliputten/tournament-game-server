@@ -385,7 +385,7 @@ class GameController(Storage):
         # Prepare data...
         Token = appSession.getToken()
         gameToken = appSession.getGameToken()
-        gameMode = appSession.getVariable('mode')
+        gameMode = appSession.getVariable('gameMode')
         partnerToken = appSession.getVariable('partnerToken')
         partnerName = appSession.getVariable('partnerName')
         #  gameRecord = gameController.getGameData(gameToken=gameToken)
