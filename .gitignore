@@ -63,3 +63,4 @@ config.local.yml
 *.db
 db/*
 !db/.keep
+questions.yaml

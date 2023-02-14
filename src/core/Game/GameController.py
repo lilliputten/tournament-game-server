@@ -2,7 +2,7 @@
 # @module GameController
 # @desc Game controller utils
 # @since 2023.02.13, 13:52
-# @changed 2023.02.14, 21:04
+# @changed 2023.02.14, 23:45
 
 
 from datetime import datetime
@@ -14,7 +14,7 @@ from src.core.lib.Storage import Storage
 
 from src.core.lib.logger import DEBUG, getDateStr, getMsTimeStamp
 from src.core.lib.uniqueToken import createUniqueToken
-from src.core.lib.utils import empty, getTrace, hasNotEmpty, notEmpty
+from src.core.lib.utils import empty, getObjKey, getTrace, hasNotEmpty, notEmpty
 
 from src.core.Waiting import WaitingHelpers, waitingStorage, WaitingConstants
 
@@ -63,8 +63,8 @@ class GameController(Storage):
         })
 
         # Get mode & store it to session...
-        mode = requestData['mode']
-        appSession.setVariable('mode', mode)
+        gameMode = requestData['gameMode']
+        appSession.setVariable('gameMode', gameMode)
 
         # Get name & store it to session...
         if not hasNotEmpty(requestData, 'name'):
@@ -81,7 +81,7 @@ class GameController(Storage):
         appSession.setVariable('name', name)
 
         # Check mode -- waiting isn't required for 'single' mode
-        if mode != 'multi':
+        if gameMode != 'multi':
             reason = 'No multi player mode: waiting is not required'
             responseData = dict(self.startGame(partnerRecord=None), **{
                 'reason': reason,
@@ -96,7 +96,7 @@ class GameController(Storage):
         # Prepare data...
         data = {
             'name': name,
-            'mode': mode,
+            'gameMode': gameMode,
             'timestamp': timestamp,
             'timestr': timestr,
             'ip': request.remote_addr,
@@ -114,14 +114,24 @@ class GameController(Storage):
         })
         # Has active game?
         if foundRecord:  # and 'gameToken' in foundRecord and not hasNotEmpty(foundRecord, 'gameToken'):
+            gameToken = getObjKey(foundRecord, 'gameToken')
+            partnerName = getObjKey(foundRecord, 'partnerName')
+            partnerToken = getObjKey(foundRecord, 'partnerToken')
             responseData = dict(data, **{
                 'success': True,
                 'reason': 'Already have active game',
-                'status': 'success',
-                'gameToken': foundRecord['gameToken'],
+                'status': 'waitingFinished',
+                'gameToken': gameToken,
+                'gameMode': gameMode,
+                'partnerName': partnerName,
+                'partnerToken': partnerToken,
                 'recordId': foundRecord.doc_id,
                 # error?
             })
+            appSession.setVariable('gameToken', gameToken)
+            appSession.setVariable('gameMode', gameMode)
+            appSession.setVariable('partnerName', partnerName)
+            appSession.setVariable('partnerToken', partnerToken)
             DEBUG(getTrace('Already have active game -> finished'), responseData)
             return responseData
 
@@ -288,9 +298,9 @@ class GameController(Storage):
 
         # Prepare other params...
         partnerName = partnerRecord['name'] if partnerRecord else None
-        partnerToken = partnerRecord['token'] if partnerRecord else None
+        partnerToken = partnerRecord['Token'] if partnerRecord else None
         selfName = appSession.getVariable('name')
-        mode = appSession.getVariable('mode')
+        gameMode = appSession.getVariable('gameMode')
         gameToken = createUniqueToken()
 
         partners = [Token]
@@ -331,7 +341,7 @@ class GameController(Storage):
         # Add game record...
         gameData = {
             'gameToken': gameToken,
-            'gameMode': mode,
+            'gameMode': gameMode,
             'timestamp': timestamp,
             'timestr': timeStr,
             'partners': partners,
@@ -355,7 +365,7 @@ class GameController(Storage):
             'success': True,
             'reason': 'Game started',
             'status': 'waitingFinished',  # waiting, finished, failed
-            'gameMode': mode,
+            'gameMode': gameMode,
             'gameTimestamp': timestamp,
             'gameTimeStr': timeStr,
             'gameRecordId': gameRecordId,

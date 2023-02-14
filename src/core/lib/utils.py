@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @module utils
 # @since 2020.02.23, 02:18
-# @changed 2023.02.14, 16:10
+# @changed 2023.02.14, 23:45
 
 
 import traceback
@@ -16,8 +16,12 @@ def notEmpty(var):
     return not empty(var)
 
 
-def hasNotEmpty(obj, id):
-    return obj and id in obj and notEmpty(obj[id])
+def hasNotEmpty(obj, key):
+    return obj and key in obj and notEmpty(obj[key])
+
+
+def getObjKey(obj, key):
+    return obj[key] if obj and key in obj else None
 
 
 def msTimeFromSec(sec):
@@ -104,6 +108,7 @@ __all__ = [  # Exporting objects...
     'empty',
     'notEmpty',
     'hasNotEmpty',
+    'getObjKey',
     'msTimeFromSec',
     'msTimeFromMin',
     'quoteStr',
