@@ -9,6 +9,8 @@ import datetime
 from flask import Blueprint
 from flask import jsonify
 from flask import request
+from tinydb import Query
+# from tinydb.table import Document
 
 from config import config
 
@@ -23,7 +25,7 @@ from src.core.lib.utils import getTrace
 from src import appSession
 from src import appAuth
 
-from src.core.Waiting import waitingStorage, WaitingHelpers
+from src.core.Waiting import WaitingConstants, waitingStorage, WaitingHelpers
 from src.core.Game import gameController
 
 blueprintWaiting = Blueprint('blueprintWaiting', __name__)
@@ -58,35 +60,68 @@ def blueprintWaiting_waitingStart():
     # Prepare extra parameters...
     now = datetime.datetime.now()
     timestamp = getMsTimeStamp(now)  # Get milliseconds timestamp (for technical usage)
-    #  hasToken = appSession.hasToken()
+    #  timestr = getDateStr(now)
+    # Prepare data...
     data = {
         'name': name,
         'timestamp': timestamp,
         'timestr': getDateStr(now),
         'ip': request.remote_addr,
     }
-    # Add record item...
+    #  hasToken = appSession.hasToken()
+    Token = appSession.getToken()
     waitingStorage.dbSync()
-    # Create db query...
-    Token = appSession.getToken()
-    comboQuery = WaitingHelpers.getValidRecordQuery(removeCurrentTokenRecords=True, Token=Token)
-    # Remove all obsolete records...
-    removedRecords = waitingStorage.removeRecords(comboQuery)
-    # Add updated record
-    Token = appSession.getToken()
-    recordId = waitingStorage.addRecord(
-        timestamp=timestamp,
-        Token=Token,
-        data=data,
-    )
-    # TODO: Check result of db operation?
-    waitingStorage.dbClose()
-    # Return success result...
-    responseData = dict(data, **{
-        'success': True,
-        'recordId': recordId,
-        # error?
+    # Try to find active record
+    # findQuery = WaitingHelpers.getValidRecordQuery(Token=Token)
+    q = Query()
+    query = (q.timestamp >= timestamp - WaitingConstants.validWaitingPeriodMs) & (q.Token == Token) & (q.gameToken.exists())  # & (q.gameToken is not None)
+    foundRecord = waitingStorage.findFirstRecord(query)
+    DEBUG(getTrace('DEBUG findQuery'), {
+        'foundRecord': foundRecord,
+        #  'removedRecords': removedRecords,
     })
+    # Has active game?
+    if foundRecord:  # and 'gameToken' in foundRecord and not hasNotEmpty(foundRecord, 'gameToken'):
+        responseData = dict(data, **{
+            'success': True,
+            'reason': 'Already have active game',
+            'gameToken': foundRecord['gameToken'],
+            #  'recordId': foundRecord['doc_id'],
+            # error?
+        })
+    else:
+        # Remove all obsolete records...
+        removeQuery = WaitingHelpers.getInvalidRecordQuery(findInvalidRecords=True, Token=Token)
+        removedRecords = waitingStorage.removeRecords(removeQuery)
+        if len(removedRecords):
+            DEBUG(getTrace('Removed records'), {
+                'removedRecords': removedRecords,
+                'removedRecordsCount': len(removedRecords),
+            })
+        # Update or add record
+        # db = waitingStorage.getDbHandler()
+        #  # TODO: upsert
+        #  recordData = {
+        #      'timestamp': timestamp,
+        #      'timestr': timestr,
+        #      'Token': Token,
+        #      'data': data,
+        #  }
+        #  q = Query()
+        #  db.upsert(Document(recordData, q.Token == Token))
+        recordId = waitingStorage.addRecord(
+            timestamp=timestamp,
+            Token=Token,
+            data=data,
+        )
+        # TODO: Check result of db operation?
+        waitingStorage.dbClose()
+        # Return success result...
+        responseData = dict(data, **{
+            'success': True,
+            'recordId': recordId,
+            # error?
+        })
     #  # DEBUG: Emulate loooong request
     #  DEBUG(getTrace(), {'info': 'start waiting'})
     #  time.sleep(5)
@@ -94,7 +129,7 @@ def blueprintWaiting_waitingStart():
         'requestData': requestData,
         'responseData': responseData,
         #  'removedRecords': removedRecords,
-        'removedRecordsCount': len(removedRecords),
+        # 'removedRecordsCount': len(removedRecords),
     })
     res = jsonify(responseData)
     return appSession.addExtendedSessionToResponse(res)
@@ -108,7 +143,7 @@ def blueprintWaiting_waitingCheck():
     if requestError:
         return requestError
     # Try start game session...
-    Token = appSession.getToken()
+    # Token = appSession.getToken()
     responseData = gameController.tryStartGame()
     DEBUG(getTrace(), {
         'responseData': responseData,
@@ -129,7 +164,7 @@ def blueprintWaiting_waitingStop():
     waitingStorage.dbSync()
     # Create db query...
     Token = appSession.getToken()
-    comboQuery = WaitingHelpers.getValidRecordQuery(removeCurrentTokenRecords=True, Token=Token)
+    comboQuery = WaitingHelpers.getInvalidRecordQuery(findInvalidRecords=True, Token=Token)
     # Remove all obsolete records and records with current token...
     removedRecords = waitingStorage.removeRecords(comboQuery)
     # TODO: Check result of db operation?

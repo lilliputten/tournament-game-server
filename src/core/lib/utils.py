@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @module utils
 # @since 2020.02.23, 02:18
-# @changed 2023.02.13, 23:51
+# @changed 2023.02.14, 16:10
 
 
 import traceback
@@ -10,6 +10,14 @@ import re
 
 def empty(var):
     return not var and var is None
+
+
+def notEmpty(var):
+    return not empty(var)
+
+
+def hasNotEmpty(obj, id):
+    return obj and id in obj and notEmpty(obj[id])
 
 
 def msTimeFromSec(sec):
@@ -94,6 +102,8 @@ def getTrace(appendStr=None):
 
 __all__ = [  # Exporting objects...
     'empty',
+    'notEmpty',
+    'hasNotEmpty',
     'msTimeFromSec',
     'msTimeFromMin',
     'quoteStr',

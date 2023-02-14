@@ -2,7 +2,7 @@
 # @module GameController
 # @desc Game controller utils
 # @since 2023.02.13, 13:52
-# @changed 2023.02.13, 23:31
+# @changed 2023.02.14, 17:15
 
 
 from datetime import datetime
@@ -215,6 +215,10 @@ class GameController(Storage):
         return responseData
 
     def startGameSession(self):
+        """
+        It's not really a start of the game (it occured in the tryStartGame method).
+        Here prepared final game data for the client.
+        """
         # Prepare data...
         Token = appSession.getToken()
         gameToken = appSession.getGameToken()
@@ -236,7 +240,7 @@ class GameController(Storage):
                 'success': True,
                 'status': 'failed',
                 'reason': 'Error',
-                'error': 'One of required parameters is empty',
+                'error': 'Required game parameters is not satisfied',
             }
             DEBUG(getTrace('One of required parameters is empty -> error'), responseData)
             return responseData

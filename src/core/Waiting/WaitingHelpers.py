@@ -13,22 +13,39 @@ from src.core.lib.logger import (
 from . import WaitingConstants
 
 
-def getValidRecordQuery(removeCurrentTokenRecords=False, validPeriodMs=0, Token=None):
+def getInvalidRecordQuery(findInvalidRecords=False, Token=None):
     """
     Create tinyDB query for fetching (removing) obsolete records and records
-    with current token (if flag `removeCurrentTokenRecords` passed).
+    with current token (if flag `findInvalidRecords` passed).
     """
     timestamp = getMsTimeStamp(datetime.datetime.now())  # Get milliseconds timestamp (for technical usage)
     validTimestamp = timestamp - WaitingConstants.validWaitingPeriodMs
     q = Query()
-    query = q.timestamp < validTimestamp  # Remove all obsolete records
-    if removeCurrentTokenRecords and Token and Token is not None:
+    query = q.timestamp < validTimestamp
+    if findInvalidRecords and Token and Token is not None:
         #  Token = appSession.getToken()
         # Remove all records with current token
         query = (q.Token == Token) | query
     return query
 
 
+def getValidRecordQuery(Token=None):
+    """
+    Create tinyDB query for fetching (removing) actual records and records
+    with current token (if flag `findInvalidRecords` passed).
+    """
+    timestamp = getMsTimeStamp(datetime.datetime.now())  # Get milliseconds timestamp (for technical usage)
+    validTimestamp = timestamp - WaitingConstants.validWaitingPeriodMs
+    q = Query()
+    query = q.timestamp >= validTimestamp
+    if Token and Token is not None:
+        #  Token = appSession.getToken()
+        # Remove all records with current token
+        query = (q.Token == Token) & query
+    return query
+
+
 __all__ = [  # Exporting objects...
+    'getInvalidRecordQuery',
     'getValidRecordQuery',
 ]
