@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @module blueprintQuestions
 # @since 2023.02.11, 22:03
-# @changed 2023.02.15, 03:08
+# @changed 2023.02.16, 01:06
 
 #  import datetime
 
@@ -43,7 +43,7 @@ def blueprintQuestions_getQuestions():
     if requestError:
         return requestError
 
-    data = questions.loadQuestions()
+    data = questions.getClientQuestionsData()
     responseData = dict(data, **{
         'success': True,
     })

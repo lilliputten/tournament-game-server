@@ -62,6 +62,17 @@ class Test_gameStorage(unittest.TestCase):
         })
         self.assertTrue(data)
 
+    def test_getClientQuestionsData(self):
+        """
+        getClientQuestionsData
+        """
+        print('\nRunning test', getTrace())
+        data = questions.getClientQuestionsData()
+        DEBUG(getTrace('test'), {
+            'data': data,
+        })
+        self.assertTrue(data)
+
 
 if __name__ == '__main__':
     unittest.main()

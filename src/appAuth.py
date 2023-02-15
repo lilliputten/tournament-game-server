@@ -17,14 +17,17 @@ DEBUG('@:appAuth: starting')
 
 @auth.verify_password
 def authenticate(username, password):
-    DEBUG(getTrace(), {
-        'username': username,
-        'password': password,
-    })
+    success = False
     if username and password:
         if username == config['apiUser'] and password == config['apiPass']:
-            return True
-    return False
+            success = True
+    DEBUG(getTrace(), {
+        # TODO: To log other detailed info
+        'username': username,
+        'password': '[hidden]',
+        'success': success,
+    })
+    return success
 
 
 __all__ = [  # Exporting objects...

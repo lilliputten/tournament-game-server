@@ -43,8 +43,8 @@
         "-f", // Stop on first fail
         // Specify python module path below...
         "src/core/Questions/Questions_test.py",
-        // "-k", // Specify test match string below...
-        // "test_addObsoleteRecord",
+        "-k", // Specify test match string below...
+        "test_getClientQuestionsData",
       ],
     },
     {
