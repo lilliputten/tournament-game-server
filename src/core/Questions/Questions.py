@@ -40,6 +40,7 @@ class Questions():
         return {}
 
     def getQuestions(self, forceLoad=False):
+        # TODO: Do forceLoad time-dependent
         questions = self.questions
         if questions is None or forceLoad:
             questions = self.loadQuestions()
@@ -50,6 +51,7 @@ class Questions():
         questions = srcData['questions']
         # Create auto-id for each question if id absent
         resultedQuestions = [dict(q, **{'id': q['id'] if hasNotEmpty(q, 'id') else 'Q' + str(i + 1)}) for i, q in enumerate(questions)]
+        # TODO: Remove `correct` field from answer items?
         return {'questions': resultedQuestions}
 
 
