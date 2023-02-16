@@ -15,11 +15,8 @@ import unittest
 
 from tinydb import Query
 
-#  from src.core.lib import utils
-# from src.core.lib.logger import DEBUG
 from src.core.lib.utils import getTrace
 from src.core.lib.logger import (
-    #  getDateStr,
     getMsTimeStamp,
 )
 

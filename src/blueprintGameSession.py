@@ -8,7 +8,7 @@
 
 from flask import Blueprint
 from flask import jsonify
-#  from flask import request
+from flask import request
 
 from config import config
 
@@ -58,7 +58,8 @@ def blueprintGameSession_gameSessionStart():
 @appAuth.auth.login_required
 def blueprintGameSession_gameSessionCheck():
     # Check error...
-    requestError = serverUtils.checkInvalidRequestError(checkToken=True, checkRequestJsonData=False)
+    requestError = serverUtils.checkInvalidRequestError(
+        checkToken=True, checkGameToken=True, checkRequestJsonData=False)
     if requestError:
         return requestError
     # TODO: ...
@@ -78,18 +79,29 @@ def blueprintGameSession_gameSessionCheck():
 @blueprintGameSession.route(apiRoot + '/gameSessionStop', methods=['POST'])
 @appAuth.auth.login_required
 def blueprintGameSession_gameSessionStop():
-    appSession.removeVariable('gameToken')
     # Check error...
-    requestError = serverUtils.checkInvalidRequestError(checkToken=True, checkRequestJsonData=False)
+    requestError = serverUtils.checkInvalidRequestError(
+        checkToken=True, checkGameToken=True, checkRequestJsonData=False)
     if requestError:
         return requestError
-    # TODO?
-    responseData = {
-        'success': True,
-        'reason': 'DEBUG',
-        'status': 'DEBUG',
-        # error?
-    }
+    responseData = gameController.stopGameSession()
+    DEBUG(getTrace(), {
+        'responseData': responseData,
+    })
+    res = jsonify(responseData)
+    return appSession.addExtendedSessionToResponse(res)
+
+
+@blueprintGameSession.route(apiRoot + '/gameSessionCheckAnswer', methods=['POST'])
+@appAuth.auth.login_required
+def blueprintGameSession_gameSessionCheckAnswer():
+    # Check error...
+    requestError = serverUtils.checkInvalidRequestError(checkToken=True, checkGameToken=True, checkRequestJsonData=True)
+    if requestError:
+        return requestError
+
+    responseData = gameController.doCheckAnswer(request)
+
     DEBUG(getTrace(), {
         'responseData': responseData,
     })

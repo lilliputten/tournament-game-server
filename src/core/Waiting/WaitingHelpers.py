@@ -4,7 +4,7 @@
 # @changed 2023.02.13, 15:00
 
 from tinydb import Query
-import datetime
+from datetime import datetime
 
 from src.core.lib.logger import (
     getMsTimeStamp,
@@ -18,7 +18,7 @@ def getInvalidRecordQuery(findInvalidRecords=False, Token=None):
     Create tinyDB query for fetching (removing) obsolete records and records
     with current token (if flag `findInvalidRecords` passed).
     """
-    timestamp = getMsTimeStamp(datetime.datetime.now())  # Get milliseconds timestamp (for technical usage)
+    timestamp = getMsTimeStamp(datetime.now())  # Get milliseconds timestamp (for technical usage)
     validTimestamp = timestamp - WaitingConstants.validWaitingPeriodMs
     q = Query()
     query = q.timestamp < validTimestamp
@@ -34,7 +34,7 @@ def getValidRecordQuery(Token=None):
     Create tinyDB query for fetching (removing) actual records and records
     with current token (if flag `findInvalidRecords` passed).
     """
-    timestamp = getMsTimeStamp(datetime.datetime.now())  # Get milliseconds timestamp (for technical usage)
+    timestamp = getMsTimeStamp(datetime.now())  # Get milliseconds timestamp (for technical usage)
     validTimestamp = timestamp - WaitingConstants.validWaitingPeriodMs
     q = Query()
     query = q.timestamp >= validTimestamp

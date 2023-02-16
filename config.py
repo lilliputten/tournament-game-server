@@ -130,6 +130,10 @@ config = {  # Default config
     #  'dbExt': '.db',  # sqlite3 database file extensions
     'dbExt': '.json',  # tinydb database file extensions
 
+    # Questions...
+
+    'validQuestionsPeriodMs': 15 * 60 * 1000,  # X mins
+
     # API
 
     'legalOrigins': [

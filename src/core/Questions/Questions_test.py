@@ -1,25 +1,18 @@
 # -*- coding:utf-8 -*-
 # @module Questions_test
 # @since 2023.02.15, 01:53
-# @changed 2023.02.15, 02:26
+# @changed 2023.02.16, 17:00
 
 # @see https://docs.python.org/3/library/unittest.html
-# @see: https://tinydb.readthedocs.io/en/latest/usage.html
 
 # NOTE: For running only current test use:
 #  - `npm run -s python-tests -- -k Questions`
 #  - `python -m unittest -f src/core/Records/Questions_test.py`
 
-# import datetime
 import unittest
 
-#  from src.core.lib import utils
 from src.core.lib.logger import DEBUG
 from src.core.lib.utils import getTrace
-# from src.core.lib.logger import (
-#     #  getDateStr,
-#     getMsTimeStamp,
-# )
 
 from .Questions import Questions
 
@@ -30,7 +23,7 @@ print('\nRunning tests for', getTrace())
 questions = Questions(testMode=True)
 
 
-class Test_gameStorage(unittest.TestCase):
+class Test_Questions(unittest.TestCase):
 
     #  def setUp(self):  # TODO: Initializations before each test
 
@@ -46,20 +39,14 @@ class Test_gameStorage(unittest.TestCase):
         """
         print('\nRunning test', getTrace())
         fileName = questions.getFileName()
-        DEBUG(getTrace('test'), {
-            'fileName': fileName,
-        })
         self.assertTrue(fileName)
 
     def test_loadQuestions(self):
         """
-        loadQuestions
+        loadQuestionsData
         """
         print('\nRunning test', getTrace())
-        data = questions.loadQuestions()
-        DEBUG(getTrace('test'), {
-            'data': data,
-        })
+        data = questions.loadQuestionsData()
         self.assertTrue(data)
 
     def test_getClientQuestionsData(self):
@@ -68,11 +55,37 @@ class Test_gameStorage(unittest.TestCase):
         """
         print('\nRunning test', getTrace())
         data = questions.getClientQuestionsData()
-        DEBUG(getTrace('test'), {
-            'data': data,
-        })
         self.assertTrue(data)
+
+    def test_removeQuestionsCorrectAnswers(self):
+        """
+        removeQuestionsCorrectAnswers
+        """
+        print('\nRunning test', getTrace())
+        qq = [{'question': 'Question text', 'answers': [{'text': 'Answer text', 'correct': True}]}]
+        data = questions.removeQuestionsCorrectAnswers(qq)
+        self.assertTrue(data)
+
+    def test_removeQuestionAnswersCorrectData(self):
+        """
+        removeQuestionAnswersCorrectData
+        """
+        print('\nRunning test', getTrace())
+        q = {'question': 'Question text', 'answers': [{'text': 'Answer text', 'correct': True}]}
+        newQ = questions.removeQuestionAnswersCorrectData(q)
+        self.assertTrue('correct' not in newQ['answers'][0])
+
+    def test_removeAnswerCorrectData(self):
+        """
+        removeAnswerCorrectData
+        """
+        print('\nRunning test', getTrace())
+        a = {'text': 'Answer text', 'correct': True}
+        newA = questions.removeAnswerCorrectData(a)
+        self.assertTrue('correct' in a)
+        self.assertTrue('correct' not in newA)
 
 
 if __name__ == '__main__':
+    DEBUG(getTrace(' test run'))
     unittest.main()

@@ -34,9 +34,9 @@ DEBUG(getTrace('starting'), {
 
 @blueprintQuestions.route(apiRoot + '/loadQuestions', methods=['GET'])
 @appAuth.auth.login_required
-def blueprintQuestions_getQuestions():
+def blueprintQuestions_loadQuestions():
     """
-    getQuestions
+    loadQuestions
     """
     # Start error...
     requestError = serverUtils.checkInvalidRequestError(checkToken=True)
