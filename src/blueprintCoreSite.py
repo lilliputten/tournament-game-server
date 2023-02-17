@@ -52,6 +52,15 @@ def blueprintCoreSite_root_hello():
     return render_template('hello.html')
 
 
+@blueprintCoreSite.route('/test')
+def blueprintCoreSite_root_test():
+    """
+    render_template demo
+    """
+    DEBUG(getTrace())
+    return render_template('test.html')
+
+
 #  @blueprintCoreSite.route('/')
 #  @blueprintCoreSite.route('/<path:path>')
 #  def blueprintCoreSite_root_htmlAppBuild(path=None):
