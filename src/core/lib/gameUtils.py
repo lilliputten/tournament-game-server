@@ -7,7 +7,7 @@ def getLatestTimestamp(list):
 
 
 def getGameTimestamps(gameRecord):
-    ids = ['timestamp', 'startTimestamp', 'lastActivityTimestamp']
+    ids = ['timestamp', 'startedTimestamp', 'lastActivityTimestamp']
     return list(filter(None, map(lambda id: gameRecord[id] if hasNotEmpty(gameRecord, id) else None, ids)))
 
 

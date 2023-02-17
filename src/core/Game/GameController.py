@@ -2,7 +2,7 @@
 # @module GameController
 # @desc Game controller utils
 # @since 2023.02.13, 13:52
-# @changed 2023.02.17, 05:59
+# @changed 2023.02.17, 16:50
 
 
 from datetime import datetime
@@ -130,6 +130,7 @@ class GameController(Storage):
 
             #  if gameRecord:
             responseData = dict(gameRecord if gameRecord else {}, **data, **{
+                'Token': Token,
                 'success': True,
                 'reason': 'Already have active game',
                 'status': 'waitingFinished',
@@ -326,6 +327,7 @@ class GameController(Storage):
             Token: {
                 'name': selfName,
                 'questionAnswers': {},
+                'status': 'playing',
             },
         }
 
@@ -347,6 +349,7 @@ class GameController(Storage):
             partnersInfo[partnerToken] = {
                 'name': partnerName,
                 'questionAnswers': {},
+                'status': 'playing',
             }
             partnerUpdateData = {
                 'partnerToken': Token,
@@ -365,8 +368,8 @@ class GameController(Storage):
             # 'lastActivityTimestr': timeStr,
             'gameToken': gameToken,
             'gameMode': gameMode,
-            'startTimestamp': timestamp,
-            'startTimestr': timeStr,
+            'startedTimestamp': timestamp,
+            'startedTimestr': timeStr,
             'timestamp': timestamp,  # Last activity!
             'timestr': timeStr,  # Last activity!
             'partners': partners,
@@ -546,14 +549,16 @@ class GameController(Storage):
 
         waitingStorage.dbSave()
 
-        # Update session (!!!)
-        appSession.removeVariable('gameToken')
-        appSession.removeVariable('gameMode')
-        appSession.removeVariable('partnerName')
-        appSession.removeVariable('partnerToken')
+        # # Update session (!!!)
+        # appSession.removeVariable('gameToken')
+        # appSession.removeVariable('gameMode')
+        # appSession.removeVariable('partnerName')
+        # appSession.removeVariable('partnerToken')
 
         reason = 'Game stopped'
         responseData = dict(gameRecord, **gameUpdateData, **{
+            'Token': Token,
+            'gameToken': gameToken,
             'gameStatus': gameStatus,
             'success': True,
             'status': 'gameStopped',
@@ -603,15 +608,25 @@ class GameController(Storage):
             return responseData
 
         gameStatus = gameRecord['gameStatus']
-        if gameStatus != 'active':
-            error = 'Game is not active (' + gameStatus + ')'
-            responseData = {
-                'success': False,
-                'reason': 'Error',
-                'error': error,
-            }
-            DEBUG(getTrace('Error: ' + error), responseData)
-            return responseData
+        finishedStatus = gameRecord['finishedStatus'] if 'finishedStatus' in gameRecord else 'none'
+        # correctStatus = gameStatus == 'active' or (gameStatus == 'finished' and finishedStatus != 'allFinished')
+        # if not correctStatus:
+        #     error = 'Invalid game status (gameStatus: ' + gameStatus + ', finishedStatus: ' + finishedStatus + ')'
+        #     responseData = {
+        #         'success': False,
+        #         'reason': 'Error',
+        #         'error': error,
+        #         'gameStatus': gameStatus,
+        #         'finishedStatus': finishedStatus,
+        #     }
+        #     DEBUG(getTrace('Error: ' + error), responseData)
+        #     return responseData
+
+        partnersInfo = gameRecord['partnersInfo']
+        selfInfo = partnersInfo[Token]
+        selfInfo['status'] = 'finished'
+        partnersInfo[Token] = selfInfo
+        gameRecord['partnersInfo'] = partnersInfo
 
         db = gameStorage.getDbHandler()
 
@@ -619,6 +634,7 @@ class GameController(Storage):
         gameStatus = 'finished'
         gameUpdateData = {
             'gameStatus': gameStatus,
+            'finishedStatus': finishedStatus,
             'finishedByPartner': Token,
             'timestamp': timestamp,
             'timestr': timestr,
@@ -627,7 +643,24 @@ class GameController(Storage):
         }
         db.update(gameUpdateData, query)
 
+        # Remove old games...
+        q = Query()
+        query = ((
+            q.timestamp < timestamp -
+            GameConstants.storeOldGamePeriodMs) & ((
+                q.gameMode == 'finished') | (
+                q.gameMode == 'stopped')))  # & (q.gameToken is not None)
+        removedGames = gameStorage.extractRecords(query)
+        removedGamesCount = len(removedGames)
+        if removedGamesCount:
+            DEBUG(getTrace('Removed old games'), {
+                'removedGamesCount': removedGamesCount,
+                'removedGames': removedGames,
+            })
+
         gameStorage.dbSave()
+
+        # TODO: Save to results database?
 
         # Remove game waitings for this game
         q = Query()
@@ -638,12 +671,14 @@ class GameController(Storage):
 
         reason = 'Game finished'
         responseData = dict(gameRecord, **gameUpdateData, **{
+            'Token': Token,
+            'gameToken': gameToken,
             #  'gameStatus': gameStatus,
             'success': True,
             'status': 'gameFinished',
             'reason': reason,
-            #  'startTimestamp': gameRecord['startTimestamp'],
-            #  'startTimestr': gameRecord['startTimestr'],
+            #  'startedTimestamp': gameRecord['startedTimestamp'],
+            #  'startedTimestr': gameRecord['startedTimestr'],
             #  'finishedTimestamp': timestamp,
             #  'finishedTimestr': timestr,
             # error?
@@ -704,7 +739,8 @@ class GameController(Storage):
         foundQuestions = list(filter(lambda q: q['id'] == questionId, questionsList))
         question = foundQuestions[0] if foundQuestions else None
         #  question = list(filter(lambda q: q['id'] == questionId, questionsList))
-        foundAnswers = list(filter(lambda a: a['id'] == answerId, question['answers'])) if question and 'answers' in question else None
+        foundAnswers = list(filter(lambda a: a['id'] == answerId,
+                                   question['answers'])) if question and 'answers' in question else None
         answer = foundAnswers[0] if foundAnswers else None
 
         isCorrect = True if answer and 'correct' in answer and answer['correct'] else False
@@ -785,6 +821,8 @@ class GameController(Storage):
 
         reason = 'Answer checked'
         responseData = dict(gameRecord, **data, **{
+            'Token': Token,
+            'gameToken': gameToken,
             'success': True,
             #  'status': 'debug',
             'reason': reason,
@@ -820,19 +858,19 @@ class GameController(Storage):
             DEBUG(getTrace('Error: ' + error), responseData)
             return responseData
 
-        # Check game status...
-        gameStatus = gameRecord['gameStatus']
-        if gameStatus != 'active':
-            error = 'Game is not active (' + gameStatus + ')'
-            responseData = {
-                'success': False,
-                'reason': 'Error',
-                'status': 'gameNotActive',
-                'gameStatus': gameStatus,
-                'error': error,
-            }
-            DEBUG(getTrace('Error: ' + error), responseData)
-            return responseData
+        # # Check game status...
+        # gameStatus = gameRecord['gameStatus']
+        # if gameStatus != 'active':
+        #     error = 'Game is not active (' + gameStatus + ')'
+        #     responseData = {
+        #         'success': False,
+        #         'reason': 'Error',
+        #         'status': 'gameNotActive',
+        #         'gameStatus': gameStatus,
+        #         'error': error,
+        #     }
+        #     DEBUG(getTrace('Error: ' + error), responseData)
+        #     return responseData
 
         # Get partnersInfo & questionAnswers...
         partnersInfo = gameRecord['partnersInfo']
@@ -840,7 +878,7 @@ class GameController(Storage):
         questionAnswers = selfInfo['questionAnswers'] if hasNotEmpty(selfInfo, 'questionAnswers') else {}
 
         DEBUG(getTrace('gameRecord'), {
-            'Token': Token,
+            'Token': Token,  # TODO: Token is gameToken?
             'gameToken': gameToken,
             'gameRecord': gameRecord,
             'partnersInfo': partnersInfo,
@@ -862,7 +900,7 @@ class GameController(Storage):
 
         # Prepare response data...
         data = {
-            #  'Token': Token,
+            'Token': Token,
             #  'gameToken': gameToken,
             #  'gameStatus': gameStatus,
             'partnersInfo': partnersInfo,

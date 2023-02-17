@@ -49,7 +49,8 @@ class Questions():
             forceLoad = True
         if questionsData is None or forceLoad:
             questionsData = self.loadQuestionsData()
-            questionsData = dict(questionsData, **{'questions': self.ensureQuestionsAndAnswersIds(questionsData['questions'])})
+            questionsData = dict(questionsData,
+                                 **{'questions': self.ensureQuestionsAndAnswersIds(questionsData['questions'])})
             self.questionsData = questionsData
             self.loadTimestamp = timestamp
         return questionsData

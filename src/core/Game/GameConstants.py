@@ -13,6 +13,8 @@ dbName = 'Game'  # Relative to `config['dbPath']`
 # Time of game validity (ms)
 validGamePeriodMs = utils.msTimeFromMin(5)
 
+storeOldGamePeriodMs = utils.msTimeFromMin(60)
+
 
 __all__ = [  # Exporting objects...
     'dbName',
