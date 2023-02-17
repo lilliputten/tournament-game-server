@@ -54,28 +54,6 @@ def blueprintGameSession_gameSessionStart():
     return appSession.addExtendedSessionToResponse(res)
 
 
-@blueprintGameSession.route(apiRoot + '/gameSessionCheck', methods=['POST'])
-@appAuth.auth.login_required
-def blueprintGameSession_gameSessionCheck():
-    # Check error...
-    requestError = serverUtils.checkInvalidRequestError(
-        checkToken=True, checkGameToken=True, checkRequestJsonData=False)
-    if requestError:
-        return requestError
-    # TODO: ...
-    responseData = {
-        'success': True,
-        'reason': 'DEBUG',
-        'status': 'DEBUG',
-        # error?
-    }
-    DEBUG(getTrace(), {
-        'responseData': responseData,
-    })
-    res = jsonify(responseData)
-    return appSession.addExtendedSessionToResponse(res)
-
-
 @blueprintGameSession.route(apiRoot + '/gameSessionStop', methods=['POST'])
 @appAuth.auth.login_required
 def blueprintGameSession_gameSessionStop():
@@ -84,7 +62,41 @@ def blueprintGameSession_gameSessionStop():
         checkToken=True, checkGameToken=True, checkRequestJsonData=False)
     if requestError:
         return requestError
-    responseData = gameController.stopGameSession()
+    responseData = gameController.gameSessionStop()
+    DEBUG(getTrace(), {
+        'responseData': responseData,
+    })
+    res = jsonify(responseData)
+    return appSession.addExtendedSessionToResponse(res)
+
+
+@blueprintGameSession.route(apiRoot + '/gameSessionFinished', methods=['POST'])
+@appAuth.auth.login_required
+def blueprintGameSession_gameSessionFinished():
+    # Check error...
+    requestError = serverUtils.checkInvalidRequestError(
+        checkToken=True, checkGameToken=True, checkRequestJsonData=False)
+    if requestError:
+        return requestError
+    responseData = gameController.gameSessionFinished()
+    DEBUG(getTrace(), {
+        'responseData': responseData,
+    })
+    res = jsonify(responseData)
+    return appSession.addExtendedSessionToResponse(res)
+
+
+@blueprintGameSession.route(apiRoot + '/gameSessionCheck', methods=['POST'])
+@appAuth.auth.login_required
+def blueprintGameSession_gameSessionCheck():
+    # Check error...
+    requestError = serverUtils.checkInvalidRequestError(
+        checkToken=True, checkGameToken=True, checkRequestJsonData=False)
+    if requestError:
+        return requestError
+
+    responseData = gameController.doSessionCheck(request)
+
     DEBUG(getTrace(), {
         'responseData': responseData,
     })
@@ -96,7 +108,7 @@ def blueprintGameSession_gameSessionStop():
 @appAuth.auth.login_required
 def blueprintGameSession_gameSessionCheckAnswer():
     # Check error...
-    requestError = serverUtils.checkInvalidRequestError(checkToken=True, checkGameToken=True, checkRequestJsonData=True)
+    requestError = serverUtils.checkInvalidRequestError(checkToken=True, checkGameToken=True)
     if requestError:
         return requestError
 

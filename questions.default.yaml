@@ -9,4 +9,5 @@ questions:
   - question: 'Question 2'
     answers:
       - text: 'Answer text 1'
+        correct: True
       - text: 'Answer text 2'

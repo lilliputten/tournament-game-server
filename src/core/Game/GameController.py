@@ -2,7 +2,7 @@
 # @module GameController
 # @desc Game controller utils
 # @since 2023.02.13, 13:52
-# @changed 2023.02.16, 22:43
+# @changed 2023.02.17, 05:59
 
 
 from datetime import datetime
@@ -35,8 +35,7 @@ class GameController(Storage):
         # Get game data...
         q = Query()
         # TODO: Lookup for active games only?
-        query = (q.Token == gameToken)
-        foundGame = gameStorage.findFirstRecord(query)
+        foundGame = gameStorage.findFirstRecord(q.Token == gameToken)
         return foundGame
 
     def getCurrentGameData(self):
@@ -60,9 +59,6 @@ class GameController(Storage):
         DEBUG(getTrace('Start'), {
             'requestData': requestData,
         })
-
-        waitingStorage.dbSync()
-        gameStorage.dbSync()
 
         # Get mode & store it to session...
         gameMode = requestData['gameMode']
@@ -104,9 +100,10 @@ class GameController(Storage):
             'ip': request.remote_addr,
         }
         Token = appSession.getToken()
+
         waitingStorage.dbSync()
 
-        # Try to find active record
+        # Try to find active waiting record
         q = Query()
         query = (
             q.timestamp >= timestamp -
@@ -123,12 +120,22 @@ class GameController(Storage):
             gameToken = getObjKey(foundRecord, 'gameToken')
             partnerName = getObjKey(foundRecord, 'partnerName')
             partnerToken = getObjKey(foundRecord, 'partnerToken')
-            responseData = dict(data, **{
+
+            # TODO: Check active game record?
+            gameStorage.dbSync()
+
+            q = Query()
+            query = (q.gameToken == gameToken) & ((q.gameStatus == 'waiting') | (q.gameStatus == 'active'))
+            gameRecord = gameStorage.findFirstRecord(query)
+
+            #  if gameRecord:
+            responseData = dict(gameRecord if gameRecord else {}, **data, **{
                 'success': True,
                 'reason': 'Already have active game',
                 'status': 'waitingFinished',
-                'gameToken': gameToken,
-                'gameMode': gameMode,
+                #  'gameToken': gameToken,
+                #  'gameMode': gameMode,
+                'gameResumed': True if gameRecord else False,
                 'partnerName': partnerName,
                 'partnerToken': partnerToken,
                 'recordId': foundRecord.doc_id,
@@ -161,14 +168,15 @@ class GameController(Storage):
 
         # Finsh & return success result...
         waitingStorage.dbClose()
+        reason = 'Waiting record added. Waiting for a partner already started.'
         responseData = dict(data, **{
             'success': True,
             'status': 'waiting',
-            'reason': 'Waiting record added. Waiting for a partner already started.',
+            'reason': reason,
             'recordId': recordId,
             # error?
         })
-        DEBUG(getTrace('Waiting started -> waitingStarted'), responseData)
+        DEBUG(getTrace(reason), responseData)
         return responseData
 
     def doWaitingCheck(self):
@@ -286,7 +294,7 @@ class GameController(Storage):
         minimalTimestamp = timestamp - GameConstants.validGamePeriodMs
         query2 = q.timestamp <= minimalTimestamp
         #  query2 = q.timestamp >= minimalTimestamp # Is it correct?
-        query = (query1 | query2)
+        query = (query1 | query2) & (q.gameStatus != 'finished')  # Preserve finished games (TODO: stopped?)
         # TODO: Remove inactive (active=False) games?
         removedGames = gameStorage.extractRecords(query)
         if len(removedGames):
@@ -317,6 +325,7 @@ class GameController(Storage):
         partnersInfo = {
             Token: {
                 'name': selfName,
+                'questionAnswers': {},
             },
         }
 
@@ -337,6 +346,7 @@ class GameController(Storage):
             partners.append(partnerToken)
             partnersInfo[partnerToken] = {
                 'name': partnerName,
+                'questionAnswers': {},
             }
             partnerUpdateData = {
                 'partnerToken': Token,
@@ -402,6 +412,7 @@ class GameController(Storage):
 
         # Empty parameters?
         if not gameToken or empty(gameToken) or (gameMode == 'multi' and empty(partnerToken)):
+            error = 'Required game parameters is not satisfied'
             # No self record found -> error
             responseData = {
                 # Params...
@@ -415,9 +426,9 @@ class GameController(Storage):
                 'success': True,
                 'status': 'failed',
                 'reason': 'Error',
-                'error': 'Required game parameters is not satisfied',
+                'error': error,
             }
-            DEBUG(getTrace('One of required parameters is empty -> error'), responseData)
+            DEBUG(getTrace('Error: ' + error), responseData)
             return responseData
 
         gameStorage.dbSync()
@@ -445,7 +456,7 @@ class GameController(Storage):
             return responseData
 
         # Echo game data
-        responseData = {
+        responseData = dict(gameRecord, **{
             # Params...
             'Token': Token,
             'gameToken': gameToken,
@@ -458,18 +469,21 @@ class GameController(Storage):
             'status': 'playing',
             'reason': 'Game started',
             # error?
-        }
+        })
 
         DEBUG(getTrace('success'), responseData)
         return responseData
 
-    def stopGameSession(self):
+    def gameSessionStop(self):
         """
         Try to stop game.
         """
         # Prepare data...
         Token = appSession.getToken()
         gameToken = appSession.getGameToken()
+        now = datetime.now()
+        timestamp = getMsTimeStamp(now)  # Get milliseconds timestamp (for technical usage)
+        timestr = getDateStr(now)
 
         gameStorage.dbSync()
 
@@ -511,9 +525,14 @@ class GameController(Storage):
         db = gameStorage.getDbHandler()
 
         # Update own record...
+        gameStatus = 'stopped'
         gameUpdateData = {
-            'gameStatus': 'stopped',
+            'gameStatus': gameStatus,
             'stoppedByPartner': Token,
+            'timestamp': timestamp,
+            'timestr': timestr,
+            'stoppedTimestamp': timestamp,
+            'stoppedTimestr': timestr,
             # TODO: Update partnersInfo data?
         }
         db.update(gameUpdateData, query)  # doc_id=selfRecord.doc_id))
@@ -527,7 +546,7 @@ class GameController(Storage):
 
         waitingStorage.dbSave()
 
-        # Update session
+        # Update session (!!!)
         appSession.removeVariable('gameToken')
         appSession.removeVariable('gameMode')
         appSession.removeVariable('partnerName')
@@ -535,9 +554,98 @@ class GameController(Storage):
 
         reason = 'Game stopped'
         responseData = dict(gameRecord, **gameUpdateData, **{
+            'gameStatus': gameStatus,
             'success': True,
             'status': 'gameStopped',
             'reason': reason,
+            # error?
+        })
+        DEBUG(getTrace(reason), dict(responseData, **{
+            'removedWaitings': removedWaitings,
+        }))
+        return responseData
+
+    def gameSessionFinished(self):
+        """
+        Try to finish game.
+        """
+        # Prepare data...
+        Token = appSession.getToken()
+        gameToken = appSession.getGameToken()
+        now = datetime.now()
+        timestamp = getMsTimeStamp(now)  # Get milliseconds timestamp (for technical usage)
+        timestr = getDateStr(now)
+
+        gameStorage.dbSync()
+
+        if not gameToken:
+            error = 'No game token passed'
+            responseData = {
+                'success': False,
+                'reason': 'Error',
+                'error': error,
+            }
+            DEBUG(getTrace('Error: ' + error), responseData)
+            return responseData
+
+        q = Query()
+        query = (q.Token == gameToken)  # & (q.gameStatus == 'active')
+        gameRecord = gameStorage.findFirstRecord(query)
+
+        if not gameRecord:
+            error = 'No game record found for token ' + gameToken
+            responseData = {
+                'success': False,
+                'reason': 'Error',
+                'error': error,
+            }
+            DEBUG(getTrace('Error: ' + error), responseData)
+            return responseData
+
+        gameStatus = gameRecord['gameStatus']
+        if gameStatus != 'active':
+            error = 'Game is not active (' + gameStatus + ')'
+            responseData = {
+                'success': False,
+                'reason': 'Error',
+                'error': error,
+            }
+            DEBUG(getTrace('Error: ' + error), responseData)
+            return responseData
+
+        db = gameStorage.getDbHandler()
+
+        # Update own record...
+        gameStatus = 'finished'
+        gameUpdateData = {
+            'gameStatus': gameStatus,
+            'finishedByPartner': Token,
+            'timestamp': timestamp,
+            'timestr': timestr,
+            'finishedTimestamp': timestamp,
+            'finishedTimestr': timestr,
+        }
+        db.update(gameUpdateData, query)
+
+        gameStorage.dbSave()
+
+        # Remove game waitings for this game
+        q = Query()
+        query = (q.gameToken.exists()) & (q.gameToken == gameToken)
+        removedWaitings = waitingStorage.extractRecords(query)
+
+        waitingStorage.dbSave()
+
+        reason = 'Game finished'
+        responseData = dict(gameRecord, **gameUpdateData, **{
+            #  'gameStatus': gameStatus,
+            'success': True,
+            'status': 'gameFinished',
+            'reason': reason,
+            #  'startTimestamp': gameRecord['startTimestamp'],
+            #  'startTimestr': gameRecord['startTimestr'],
+            #  'finishedTimestamp': timestamp,
+            #  'finishedTimestr': timestr,
             # error?
         })
         DEBUG(getTrace(reason), dict(responseData, **{
@@ -551,7 +659,7 @@ class GameController(Storage):
         timestamp = getMsTimeStamp(now)  # Get milliseconds timestamp (for technical usage)
         timestr = getDateStr(now)
 
-        # Token = appSession.getToken()
+        Token = appSession.getToken()
         gameToken = appSession.getVariable('gameToken')
 
         # Get request data...
@@ -601,48 +709,170 @@ class GameController(Storage):
 
         isCorrect = True if answer and 'correct' in answer and answer['correct'] else False
 
-        DEBUG(getTrace('Start'), {
-            'isCorrect': isCorrect,
-            'questionId': questionId,
-            'answerId': answerId,
-            'requestData': requestData,
-            'questionsList': questionsList,
-            'question': question,
-            'answer': answer,
-        })
+        #  DEBUG(getTrace('Start'), {
+        #      'isCorrect': isCorrect,
+        #      'questionId': questionId,
+        #      'answerId': answerId,
+        #      'requestData': requestData,
+        #      'questionsList': questionsList,
+        #      'question': question,
+        #      'answer': answer,
+        #  })
 
+        # Get game data...
+        gameStorage.dbSync()
+        q = Query()
+        gameQuery = q.Token == gameToken
+        gameRecord = gameStorage.findFirstRecord(gameQuery)
+        if not gameRecord:
+            error = 'Not found game record for game token ' + gameToken
+            responseData = {
+                'success': False,
+                'reason': 'Error',
+                'status': 'noGame',
+                'gameToken': gameToken,
+                'error': error,
+            }
+            DEBUG(getTrace('Error: ' + error), responseData)
+            return responseData
+
+        # Get questionAnswers
+        partnersInfo = gameRecord['partnersInfo']
+        selfInfo = partnersInfo[Token]
+        questionAnswers = selfInfo['questionAnswers'] if hasNotEmpty(selfInfo, 'questionAnswers') else {}
+        # Update current question answer
+        questionAnswers[questionId] = 'correct' if isCorrect else 'wrong'
+        # Update data in game record
+        selfInfo['questionAnswers'] = questionAnswers
+        partnersInfo[Token] = selfInfo
+        gameRecord['partnersInfo'] = partnersInfo
+
+        #  DEBUG(getTrace('gameRecord'), {
+        #      'Token': Token,
+        #      'gameToken': gameToken,
+        #      'gameRecord': gameRecord,
+        #      'partnersInfo': partnersInfo,
+        #  })
+
+        # Prepare game data to update...
         gameUpdateData = {
             'timestamp': timestamp,
             'timestr': timestr,
             'lastAnswerTimestamp': timestamp,
             'lastAnswerTimestr': timestr,
-            # TODO: Update game state (questionIdx in partnersInfo
+            'lastAnsweredBy': Token,
+            # Update game state (questionIdx in partnersInfo
+            'partnersInfo': partnersInfo,
         }
 
-        gameStorage.dbSync()
+        # Update game data...
         db = gameStorage.getDbHandler()
-        q = Query()
-        db.update(gameUpdateData, q.gameToken == gameToken)
+        db.update(gameUpdateData, gameQuery)
         gameStorage.dbSave()
 
-        # Prepare data...
+        # Prepare response data...
         data = {
-            'timestamp': timestamp,
-            'timestr': timestr,
-            'lastAnswerTimestamp': timestamp,
-            'lastAnswerTimestr': timestr,
+            #  'timestamp': timestamp,
+            #  'timestr': timestr,
             'questionId': questionId,
             'answerId': answerId,
-            # 'question': question,
+            # 'question': question, # Do not expose full data (contains `correct` fields)
             'answer': answer,
             'isCorrect': isCorrect,
+            'partnersInfo': partnersInfo,
+            'questionAnswers': questionAnswers,
         }
-        #  waitingStorage.dbSync()
 
         reason = 'Answer checked'
-        responseData = dict(data, **{
+        responseData = dict(gameRecord, **data, **{
             'success': True,
             #  'status': 'debug',
+            'reason': reason,
+        })
+        DEBUG(getTrace(reason), responseData)
+        return responseData
+
+    def doSessionCheck(self, request):
+        # Prepare extra parameters...
+        now = datetime.now()
+        timestamp = getMsTimeStamp(now)  # Get milliseconds timestamp (for technical usage)
+        timestr = getDateStr(now)
+
+        Token = appSession.getToken()
+        gameToken = appSession.getVariable('gameToken')
+
+        # Get game data...
+        gameStorage.dbSync()
+        q = Query()
+        gameQuery = q.Token == gameToken
+        gameRecord = gameStorage.findFirstRecord(gameQuery)
+
+        # Has game record found?
+        if not gameRecord:
+            error = 'Not found game record for game token ' + gameToken
+            responseData = {
+                'success': False,
+                'reason': 'Error',
+                'status': 'noGame',
+                'gameToken': gameToken,
+                'error': error,
+            }
+            DEBUG(getTrace('Error: ' + error), responseData)
+            return responseData
+
+        # Check game status...
+        gameStatus = gameRecord['gameStatus']
+        if gameStatus != 'active':
+            error = 'Game is not active (' + gameStatus + ')'
+            responseData = {
+                'success': False,
+                'reason': 'Error',
+                'status': 'gameNotActive',
+                'gameStatus': gameStatus,
+                'error': error,
+            }
+            DEBUG(getTrace('Error: ' + error), responseData)
+            return responseData
+
+        # Get partnersInfo & questionAnswers...
+        partnersInfo = gameRecord['partnersInfo']
+        selfInfo = partnersInfo[Token]
+        questionAnswers = selfInfo['questionAnswers'] if hasNotEmpty(selfInfo, 'questionAnswers') else {}
+
+        DEBUG(getTrace('gameRecord'), {
+            'Token': Token,
+            'gameToken': gameToken,
+            'gameRecord': gameRecord,
+            'partnersInfo': partnersInfo,
+        })
+
+        # Prepare game data to update (timestamps & check info)...
+        gameUpdateData = {
+            'timestamp': timestamp,
+            'timestr': timestr,
+            'lastCheckTimestamp': timestamp,
+            'lastCheckTimestr': timestr,
+            'lastCheckedBy': Token,
+        }
+
+        # Update game data...
+        db = gameStorage.getDbHandler()
+        db.update(gameUpdateData, gameQuery)
+        gameStorage.dbSave()
+
+        # Prepare response data...
+        data = {
+            #  'Token': Token,
+            #  'gameToken': gameToken,
+            #  'gameStatus': gameStatus,
+            'partnersInfo': partnersInfo,
+            'questionAnswers': questionAnswers,
+        }
+
+        reason = 'Game status checked'
+        responseData = dict(gameRecord, **data, **{
+            'success': True,
+            'status': 'gameStatusResult',
             'reason': reason,
         })
         DEBUG(getTrace(reason), responseData)

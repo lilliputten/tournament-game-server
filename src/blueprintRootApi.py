@@ -63,7 +63,7 @@ def blueprintRootApi_start():
         #  'timetag': timetag,
         'timestr': timestr,
     }
-    DEBUG(getTrace(), dict(requestData, **{'responseData': responseData}))
+    DEBUG(getTrace(), responseData)  # dict(requestData, **{'responseData': responseData}))
     res = jsonify(responseData)
     return appSession.addExtendedSessionToResponse(res)
 
