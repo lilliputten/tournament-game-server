@@ -13,7 +13,7 @@ from config import config
 dbName = 'Waiting'  # Relative to `config['dbPath']`
 
 # Time for wait for valid waitings (if not renewed)
-validWaitingPeriodMs = msTimeFromMin(40) if config['isDev'] else msTimeFromMin(2)
+validWaitingPeriodMs = msTimeFromMin(1) if config['isDev'] else msTimeFromMin(5)
 
 
 __all__ = [  # Exporting objects...
