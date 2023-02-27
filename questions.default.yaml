@@ -1,13 +1,100 @@
-questions:
-  - question: 'Question 1'
-    id: 'Test'
-    answers:
-      - text: 'Answer text 1'
-      - text: 'Answer text 2'
-        correct: True
-      - text: 'Answer text 3'
-  - question: 'Question 2'
-    answers:
-      - text: 'Answer text 1'
-        correct: True
-      - text: 'Answer text 2'
+
+
+- id: 'Rekvizity-kakogo-UFK'
+  question: 'Реквизиты какого УФК нужно указывать в платежном поручении с 2023 года?'
+  - id: 'UFK-po-g-Moskve'
+    text: 'УФК по г. Москве'
+  - id: 'UFK-svoego-regiona'
+    text: 'УФК своего региона'
+  - id: 'UFK-Tul-skoj-oblasti'
+    text: 'УФК Тульской области'
+    correct: True
+
+- id: 'Buhgalter-kompanii-pri-zapolnen'
+  question: 'Бухгалтер компании при заполнении платежного поручения по ЕНП в поле 105 указала восьмизначный код ОКТМО вместо нулевого значения. Проведет ли банк единый налоговый платеж?'
+  - id: 'Da-bank-provedet'
+    text: 'Да, банк проведет'
+    correct: True
+  - id: 'Net-platezh-ne-projdet'
+    text: 'Нет, платеж не пройдет. Его нужно уточнить'
+  - id: 'Na-usmotrenie-banka'
+    text: 'На усмотрение банка'
+
+- id: 'V-kakom-vide-podavat-uvedomlen'
+  question: 'В каком виде подавать уведомление по ЕНП?'
+  - id: 'Tolko-v-jelektronnom-vide'
+    text: 'Только в электронном виде'
+  - id: 'Tolko-na-bumage'
+    text: 'Только на  бумаге'
+  - id: 'Vse-zavisit-ot-togo-kak-sdae'
+    text: 'Все зависит от того, как сдаете отчетность в ИФНС: если на бумаге, то на бумаге, если электронно, то в электронном виде'
+    correct: True
+
+- id: 'Chto-iz-perechislennogo-v-pervu'
+  question: 'Что из перечисленного в первую очередь засчитают при перечислении единого налогового платежа?'
+  - id: 'Predstojashhij-platezh-po-nalog'
+    text: 'Предстоящий платеж по налогу на прибыль'
+  - id: 'Peni-po-transportnomu-nalogu'
+    text: 'Пени по транспортному налогу'
+  - id: 'Nedoimku-po-nalogu-na-imushhe'
+    text: 'Недоимку по налогу на имущество'
+    correct: True
+
+- id: 'Buhgalter-kompanii-perechisljae'
+  question: 'Бухгалтер компании перечисляет налоги на ЕНС без указания конкретных КБК. Какой код бухгалтер должен указать в поле «Статус плательщика»?'
+  - id: '03'
+    text: '03'
+  - id: '02'
+    text: '02'
+  - id: '01'
+    text: '01'
+    correct: True
+
+- id: 'V-kakoj-srok-nuzhno-podat-uved'
+  question: 'В какой срок нужно подать уведомление по ЕНП?'
+  - id: '25-go-chisla'
+    text: '25-го числа месяца, в котором установлен срок уплаты'
+    correct: True
+  - id: 'Ezhemesjachno-ne-pozdnee-1-go'
+    text: 'Ежемесячно не позднее 1-го числа'
+  - id: 'Ezhemesjachno-ne-pozdnee-30-go'
+    text: 'Ежемесячно не позднее 30-го числа'
+
+- id: 'Kakie-vznosy-nuzhno-perechislja'
+  question: 'Какие взносы нужно перечислять отдельной платежкой, не в составе единого налогового платежа?'
+  - id: 'Vznosy-na-travmatizm'
+    text: 'Взносы на травматизм'
+    correct: True
+  - id: 'Pensionnye-vznosy'
+    text: 'Пенсионные взносы'
+  - id: 'Medicinskie-vznosy'
+    text: 'Медицинские взносы'
+
+- id: 'Buhgalter-kompanii-reshil'
+  question: 'Бухгалтер компании решил подавать уведомление по налогам. Нужно ли фиксировать такое решение во внутренних документах компании?'
+  - id: 'Da-objazatel-no'
+    text: 'Да, обязательно'
+  - id: 'Net-jeto-ne-objazatel-no'
+    text: 'Нет, это не обязательно'
+  - id: 'Na-usmotrenie-direktora-kompani'
+    text: 'На усмотрение директора компании'
+
+- id: 'Kakoj-KBK-ukazat-v-uvedomlenii'
+  question: 'Какой КБК указать в уведомлении по ЕНП?'
+  - id: 'KBK-ENP'
+    text: 'КБК ЕНП'
+  - id: 'KBK-konkretnogo-naloga'
+    text: 'КБК конкретного налога'
+    correct: True
+  - id: 'KBK-dlja-strahovyh-vznosov'
+    text: 'КБК для страховых взносов'
+
+- id: 'Buhgalter-kompanii-nachislil-su'
+  question: 'Бухгалтер компании начислил сумму страховых взносов с выплат работникам за январь в размере 70 000 руб. Но по факту в бюджет перечислили только 55 000 руб. Какую сумму нужно  указать в уведомлении по ЕНП за январь?'
+  - id: '70-000-rub'
+    text: '70 000 руб.'
+    correct: True
+  - id: '55-000-rub'
+    text: '55 000 руб.'
+  - id: '15-000-rub'
+    text: '15 000 руб.'
