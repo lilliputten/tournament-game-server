@@ -25,7 +25,7 @@ gunicornEnv = os.getenv('GUNICORN_ENV')  # Detect gunicorn server (run on a rasp
 flaskEnv = os.getenv('FLASK_ENV')  # detect flask server (dev mode)
 isGunicorn = bool(gunicornEnv)
 isRPi = isGunicorn
-isDev = flaskEnv == 'development'
+isDev = flaskEnv == 'development' or isTest
 isProd = not isDev
 # TODO: Detect test environment
 
@@ -132,6 +132,8 @@ config = {  # Default config
 
     # Questions...
 
+    'questionsCount': 2 if isDev else 10,  # Questions number for each quiz session (selecting randomly in Questions:getClientQuestionIdsList)
+    'useRandomQuestions': True,
     'validQuestionsPeriodMs': 15 * 60 * 1000,  # X mins
 
     # API
