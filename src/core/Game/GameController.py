@@ -2,7 +2,7 @@
 # @module GameController
 # @desc Game controller utils
 # @since 2023.02.13, 13:52
-# @changed 2023.03.04, 17:03
+# @changed 2023.03.04, 21:22
 
 
 from datetime import datetime
@@ -12,6 +12,7 @@ from src import appSession
 from src.core.Questions import questions
 # from src.core.lib import serverUtils
 from src.core.lib.Storage import Storage
+from functools import reduce
 
 from src.core.lib.logger import DEBUG, getDateStr, getMsTimeStamp
 from src.core.lib.uniqueToken import createUniqueToken
@@ -20,6 +21,8 @@ from src.core.lib.utils import empty, getObjKey, getTrace, hasNotEmpty, notEmpty
 from src.core.Waiting import WaitingHelpers, waitingStorage, WaitingConstants
 
 from .GameStorage import gameStorage, GameConstants
+
+from .gameHelpers import determineGameWinner
 
 
 class GameController(Storage):
@@ -635,8 +638,8 @@ class GameController(Storage):
             DEBUG(getTrace('Error: ' + error), responseData)
             return responseData
 
-        gameStatus = gameRecord['gameStatus']
-        finishedStatus = gameRecord['finishedStatus'] if 'finishedStatus' in gameRecord else 'none'
+        oldGameStatus = gameRecord['gameStatus']
+        oldFinishedStatus = gameRecord['finishedStatus'] if 'finishedStatus' in gameRecord else 'none'
         # correctStatus = gameStatus == 'active' or (gameStatus == 'finished' and finishedStatus != 'allFinished')
         # if not correctStatus:
         #     error = 'Invalid game status (gameStatus: ' + gameStatus + ', finishedStatus: ' + finishedStatus + ')'
@@ -650,18 +653,26 @@ class GameController(Storage):
         #     DEBUG(getTrace('Error: ' + error), responseData)
         #     return responseData
 
+        partners = gameRecord['partners']
         partnersInfo = gameRecord['partnersInfo']
         selfInfo = partnersInfo[Token]
         selfInfo['status'] = 'finished'
         partnersInfo[Token] = selfInfo
         gameRecord['partnersInfo'] = partnersInfo
 
+        # gameStatus = 'finished'
+        # finishedStatus = oldFinishedStatus
+
         db = gameStorage.getDbHandler()
 
         # Update own record...
         gameStatus = 'finished'
+        isAll = reduce(lambda status, tkn: status and partnersInfo[tkn]['status'] == 'finished', partners, True)
+        finishedStatus = 'all' if isAll else 'some'
+        winnerToken = determineGameWinner(gameRecord) if isAll else None
         gameUpdateData = {
             'gameStatus': gameStatus,
+            'winnerToken': winnerToken,
             'finishedStatus': finishedStatus,
             'finishedByPartner': Token,
             'timestamp': timestamp,
@@ -701,6 +712,8 @@ class GameController(Storage):
         responseData = dict(gameRecord, **gameUpdateData, **{
             'Token': Token,
             'gameToken': gameToken,
+            'oldFinishedStatus': oldFinishedStatus,
+            'oldGameStatus': oldGameStatus,
             #  'gameStatus': gameStatus,
             'success': True,
             'status': 'gameFinished',

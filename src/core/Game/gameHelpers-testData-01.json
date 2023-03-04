@@ -1,0 +1,43 @@
+{
+  "Token": "230304-212537-409-7191390",
+  "finishedByPartner": "230213-170431-705-495361",
+  "finishedStatus": "all",
+  "finishedTimestamp": 1677940707608,
+  "finishedTimestr": "2023.03.04 21:38:27",
+  "gameMode": "multi",
+  "gameStatus": "finished",
+  "gameToken": "230304-212537-409-7191390",
+  "lastAnswerTimestamp": 1677940699876,
+  "lastAnswerTimestr": "2023.03.04 21:38:19",
+  "lastAnsweredBy": "230213-170431-705-495361",
+  "lastCheckTimestamp": 1677940841295,
+  "lastCheckTimestr": "2023.03.04 21:40:41",
+  "lastCheckedBy": "230211-165455-365-5694359",
+  "partners": [
+    "230211-165455-365-5694359",
+    "230213-170431-705-495361"
+  ],
+  "partnersInfo": {
+    "230211-165455-365-5694359": {
+      "name": "aaa",
+      "questionAnswers": {
+        "Rekvizity-kakogo-UFK": "correct"
+      },
+      "status": "finished"
+    },
+    "230213-170431-705-495361": {
+      "name": "fox",
+      "questionAnswers": {
+        "Rekvizity-kakogo-UFK": "wrong"
+      },
+      "status": "finished"
+    }
+  },
+  "questionsIds": [
+    "Rekvizity-kakogo-UFK"
+  ],
+  "startedTimestamp": 1677939937409,
+  "startedTimestr": "2023.03.04 21:25:37",
+  "timestamp": 1677940841295,
+  "timestr": "2023.03.04 21:40:41"
+}

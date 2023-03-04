@@ -143,7 +143,7 @@ class Questions():
         list = []  # Result list
         while len(list) < count:
             if not len(ids):
-                errStr = 'Questions list has unexpectedly flushed out!'
+                errStr = 'Questions list has unexpectedly flushed out (it\'s possible that there are some non-unique identifiers)!'
                 DEBUG(getTrace('error'), {
                     'errStr': errStr,
                 })
