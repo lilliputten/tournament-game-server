@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @module Questions_test
 # @since 2023.02.15, 01:53
-# @changed 2023.02.16, 17:00
+# @changed 2023.03.04, 18:40
 
 # @see https://docs.python.org/3/library/unittest.html
 
@@ -10,6 +10,8 @@
 #  - `python -m unittest -f src/core/Records/Questions_test.py`
 
 import unittest
+
+from config import config
 
 from src.core.lib.logger import DEBUG
 from src.core.lib.utils import getTrace
@@ -84,6 +86,18 @@ class Test_Questions(unittest.TestCase):
         newA = questions.removeAnswerCorrectData(a)
         self.assertTrue('correct' in a)
         self.assertTrue('correct' not in newA)
+
+    def test_getClientQuestionIdsList(self):
+        """
+        getClientQuestionIdsList
+        """
+        print('\nRunning test', getTrace())
+        qq = questions.getClientQuestionsData()['questions']
+        qqCount = len(qq)
+        questionsCount = config['questionsCount']
+        count = min(qqCount, questionsCount)
+        data = questions.getClientQuestionIdsList()
+        self.assertTrue(len(data) == count)
 
 
 if __name__ == '__main__':

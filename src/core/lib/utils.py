@@ -32,6 +32,10 @@ def msTimeFromMin(min):
     return msTimeFromSec(min * 60)
 
 
+def msTimeFromHours(hrs):
+    return msTimeFromMin(hrs * 60)
+
+
 def quoteStr(s, addQuotes=False, quoteDouble=False, quoteSingle=True):
     """
     s (str) -- Source string parameter.

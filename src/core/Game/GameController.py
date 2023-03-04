@@ -2,7 +2,7 @@
 # @module GameController
 # @desc Game controller utils
 # @since 2023.02.13, 13:52
-# @changed 2023.02.17, 16:50
+# @changed 2023.03.04, 17:03
 
 
 from datetime import datetime
@@ -19,7 +19,6 @@ from src.core.lib.utils import empty, getObjKey, getTrace, hasNotEmpty, notEmpty
 
 from src.core.Waiting import WaitingHelpers, waitingStorage, WaitingConstants
 
-# from . import GameConstants
 from .GameStorage import gameStorage, GameConstants
 
 
@@ -282,21 +281,40 @@ class GameController(Storage):
         partnerRecord = foundPartners[0]  # Choose first of found partners
         # partnerToken = partnerRecord['Token']
 
+        # Start game...
         responseData = self.startGame(partnerRecord)
 
         DEBUG(getTrace('Found partners -> start game'), responseData)
         return responseData
 
-    def removeObsoleteGames(self, tokens):
+    def removeAllObsoleteGames(self):
         # Remove obsolete (timeouted) games or games with involved tokens...
         q = Query()
-        query1 = (q.partners.any(tokens))
         timestamp = getMsTimeStamp(datetime.now())  # Get milliseconds timestamp (for technical usage)
-        minimalTimestamp = timestamp - GameConstants.validGamePeriodMs
-        query2 = q.timestamp <= minimalTimestamp
-        #  query2 = q.timestamp >= minimalTimestamp # Is it correct?
-        query = (query1 | query2) & (q.gameStatus != 'finished')  # Preserve finished games (TODO: stopped?)
-        # TODO: Remove inactive (active=False) games?
+        minimalTimestamp = timestamp - GameConstants.storeOldGamePeriodMs
+        query = q.timestamp <= minimalTimestamp
+        #  query = query & (q.gameStatus != 'finished')  # Preserve finished games (TODO: stopped?) TODO: Remove inactive (active=False) games?
+        removedGames = gameStorage.extractRecords(query)
+        if len(removedGames):
+            DEBUG(getTrace('Ovsolete games removed'), {
+                'removedGamesCount': len(removedGames),
+                'removedGames': removedGames,
+                'minimalTimestamp': minimalTimestamp,
+                'storeOldGamePeriodMs': GameConstants.storeOldGamePeriodMs,
+                'first game diff': minimalTimestamp - removedGames[0]['timestamp']
+            })
+        return len(removedGames)
+
+    def removeObsoleteWaitingGamesForPartners(self, tokens=None):
+        # Remove obsolete (timeouted) games or games with involved tokens...
+        q = Query()
+        timestamp = getMsTimeStamp(datetime.now())  # Get milliseconds timestamp (for technical usage)
+        minimalTimestamp = timestamp - GameConstants.validWaitingGamePeriodMs
+        query = q.timestamp <= minimalTimestamp
+        # query = q.timestamp >= minimalTimestamp # Is it correct?
+        if tokens and tokens is not None:
+            query = query | q.partners.any(tokens)
+        query = query & (q.gameStatus != 'finished')  # Preserve finished games (TODO: stopped?) TODO: Remove inactive (active=False) games?
         removedGames = gameStorage.extractRecords(query)
         if len(removedGames):
             DEBUG(getTrace('Ovsolete games removed'), {
@@ -304,9 +322,14 @@ class GameController(Storage):
                 'removedGamesCount': len(removedGames),
                 'removedGames': removedGames,
                 'minimalTimestamp': minimalTimestamp,
-                'validGamePeriodMs': GameConstants.validGamePeriodMs,
+                'validWaitingGamePeriodMs': GameConstants.validWaitingGamePeriodMs,
+                'first game diff': minimalTimestamp - removedGames[0]['timestamp']
             })
         return len(removedGames)
+
+    def createRandomQuestionIdsList(self):
+        list = questions.getClientQuestionIdsList()
+        return list
 
     def startGame(self, partnerRecord=None):
         # Prepare params...
@@ -361,8 +384,12 @@ class GameController(Storage):
         # Close waiting storage
         waitingStorage.dbSave()
 
+        # Prepare questions list
+        questionsIds = self.createRandomQuestionIdsList()
+
         # Add game record...
         gameData = {
+            'questionsIds': questionsIds,
             'gameStatus': 'active',
             # 'lastActivityTimestamp': timestamp,
             # 'lastActivityTimestr': timeStr,
@@ -377,7 +404,8 @@ class GameController(Storage):
         }
 
         # Remove old game records...
-        self.removeObsoleteGames(partners)
+        self.removeObsoleteWaitingGamesForPartners(partners)  # NOTE: Removing all old games, not only for current players!
+        self.removeAllObsoleteGames()
 
         # Add game
         gameRecordId = gameStorage.addRecord(Token=gameToken, data=gameData)

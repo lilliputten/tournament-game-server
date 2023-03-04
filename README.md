@@ -1,9 +1,32 @@
 <!--
  @since 2023.02.09, 16:49
- @changed 2023.02.13, 01:28
+ @changed 2023.03.04, 18:50
 -->
 
 # Tournament game backend server
+
+
+## Questions file
+
+Questions are stored in `questions.yaml` file in yaml format, in the next form:
+
+```
+questions:
+  - question: 'Question 1'
+    id: 'Test1'
+    answers:
+      - text: 'Answer text 1'
+      - text: 'Answer text 2'
+        correct: True
+      - text: 'Answer text 3'
+  - question: 'Question 2'
+    answers:
+      - text: 'Answer text 1'
+        correct: True
+      - text: 'Answer text 2'
+```
+
+See `questions.SAMPLE.yaml` for example.
 
 
 ## Build info (auto-generated)

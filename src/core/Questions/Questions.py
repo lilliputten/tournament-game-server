@@ -2,16 +2,18 @@
 # @module Questions
 # @desc Questions...
 # @since 2023.02.15, 01:48
-# @changed 2023.02.16, 22:43
+# @changed 2023.03.04, 18:40
 
 from os import path
 import yaml
 from datetime import datetime
+from random import random
+import math
+
+from config import config
 
 from src.core.lib.logger import DEBUG, getMsTimeStamp
 from src.core.lib.utils import empty, getTrace, hasNotEmpty
-
-from config import config
 
 
 class Questions():
@@ -25,6 +27,11 @@ class Questions():
 
     def getFileName(self):
         rootPath = config['rootPath']
+        # TODO: To move source file names to config?
+        #  if config['isDev']:  # Only debug mode, TODO: To check for `useSampleQuestions` parameter?
+        #      file = path.join(rootPath, 'questions.SAMPLE.yaml')
+        #      if path.isfile(file):
+        #          return file
         file = path.join(rootPath, 'questions.yaml')
         if path.isfile(file):
             return file
@@ -114,6 +121,48 @@ class Questions():
         resultedQuestions = [self.removeQuestionAnswersCorrectData(q) for q in questions]
         # resultedQuestions = map(self.removeQuestionAnswersCorrectData, questions)  # ???
         return resultedQuestions
+
+    def getClientQuestionIdsList(self):
+        """
+        Prepare specified amount of questions for clients
+        """
+        data = self.getClientQuestionsData()
+        qq = data['questions']
+        qqCount = len(qq)
+        count = qqCount
+        if not count or count <= 0:
+            return []
+        ids = [a['id'] for a in qq]
+        questionsCount = config['questionsCount']
+        if questionsCount and questionsCount is not None and questionsCount < count:
+            count = questionsCount
+        useRandomQuestions = config['useRandomQuestions']
+        if not useRandomQuestions:
+            # Return first {count} questions if randomization isn't required
+            return ids[0:count]
+        list = []  # Result list
+        while len(list) < count:
+            if not len(ids):
+                errStr = 'Questions list has unexpectedly flushed out!'
+                DEBUG(getTrace('error'), {
+                    'errStr': errStr,
+                })
+                raise Exception(errStr)
+            rand = random()  # Random float:  0.0 <= x < 1.0
+            qIdx = math.floor(rand * len(ids))
+            id = ids[qIdx]
+            if id not in list:
+                list.append(id)
+                ids.remove(id)
+        #  DEBUG(getTrace('getClientQuestionIdsList'), {
+        #      #  'qq': qq,
+        #      'ids': ids,
+        #      'questionsCount': questionsCount,
+        #      'qqCount': qqCount,
+        #      'count': count,
+        #      'list': list,
+        #  })
+        return list
 
 
 # Create singleton...
