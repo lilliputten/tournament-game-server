@@ -44,11 +44,13 @@
         // Specify python module path below...
         // "src/core/Questions/Questions_test.py",
         // "src/core/lib/gameUtils_test.py",
-        "src/core/Questions/Questions_test.py",
+        // "src/core/Questions/Questions_test.py",
+        "src/core/Game/gameHelpers_test.py",
         "-k", // Specify test match string below...
         // "test_removeQuestionAnswersCorrectData",
         // "test_getGameTimestamps",
-        "test_getClientQuestionIdsList",
+        // "test_determineGameWinner",
+        "test_determineGameWinner_fastest",
       ],
     },
     {
