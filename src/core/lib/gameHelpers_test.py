@@ -5,7 +5,7 @@ from os import path
 from src.core.lib.logger import DEBUG
 from src.core.lib.utils import getTrace
 
-from .gameHelpers import determineGameWinner, getCorrectQuestionAnswersCount
+from .gameHelpers import determineGameWinner, getCorrectQuestionAnswersCount, getGameTimestamps, getLatestGameTimestamp
 
 currPath = path.dirname(path.abspath(__file__))
 
@@ -23,6 +23,30 @@ if path.isfile(testJsonFilepath):
 
 
 class Test_gameUtils(unittest.TestCase):
+
+    def test_getGameTimestamps(self):
+        """
+        getGameTimestamps
+        """
+        print('\nRunning test', getTrace())
+        gameRecord = {
+            'timestamp': 1,
+            'lastActivityTimestamp': 2,
+        }
+        results = getGameTimestamps(gameRecord)
+        self.assertTrue(results == [1, 2])
+
+    def test_getLatestGameTimestamp(self):
+        """
+        getLatestGameTimestamp
+        """
+        print('\nRunning test', getTrace())
+        gameRecord = {
+            'timestamp': 1,
+            'lastActivityTimestamp': 2,
+        }
+        result = getLatestGameTimestamp(gameRecord)
+        self.assertTrue(result == 2)
 
     def test_getCorrectQuestionAnswersCount_0(self):
         """

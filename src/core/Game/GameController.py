@@ -2,7 +2,7 @@
 # @module GameController
 # @desc Game controller utils
 # @since 2023.02.13, 13:52
-# @changed 2023.03.04, 21:22
+# @changed 2023.03.05, 05:26
 
 
 from datetime import datetime
@@ -10,6 +10,7 @@ from tinydb import Query
 # from tinydb.table import Document
 from src import appSession
 from src.core.Questions import questions
+from src.core.Records import recordsStorage
 # from src.core.lib import serverUtils
 from src.core.lib.Storage import Storage
 from functools import reduce
@@ -22,7 +23,7 @@ from src.core.Waiting import WaitingHelpers, waitingStorage, WaitingConstants
 
 from .GameStorage import gameStorage, GameConstants
 
-from .gameHelpers import determineGameWinner
+from src.core.lib.gameHelpers import determineGameWinner
 
 
 class GameController(Storage):
@@ -296,7 +297,8 @@ class GameController(Storage):
         timestamp = getMsTimeStamp(datetime.now())  # Get milliseconds timestamp (for technical usage)
         minimalTimestamp = timestamp - GameConstants.storeOldGamePeriodMs
         query = q.timestamp <= minimalTimestamp
-        #  query = query & (q.gameStatus != 'finished')  # Preserve finished games (TODO: stopped?) TODO: Remove inactive (active=False) games?
+        # query = query & (q.gameStatus != 'finished')  # Preserve finished games
+        # (TODO: stopped?) TODO: Remove inactive (active=False) games?
         removedGames = gameStorage.extractRecords(query)
         if len(removedGames):
             DEBUG(getTrace('Ovsolete games removed'), {
@@ -317,7 +319,8 @@ class GameController(Storage):
         # query = q.timestamp >= minimalTimestamp # Is it correct?
         if tokens and tokens is not None:
             query = query | q.partners.any(tokens)
-        query = query & (q.gameStatus != 'finished')  # Preserve finished games (TODO: stopped?) TODO: Remove inactive (active=False) games?
+        # Preserve finished games (TODO: stopped?) TODO: Remove inactive (active=False) games?
+        query = query & (q.gameStatus != 'finished')
         removedGames = gameStorage.extractRecords(query)
         if len(removedGames):
             DEBUG(getTrace('Ovsolete games removed'), {
@@ -407,7 +410,8 @@ class GameController(Storage):
         }
 
         # Remove old game records...
-        self.removeObsoleteWaitingGamesForPartners(partners)  # NOTE: Removing all old games, not only for current players!
+        # NOTE: Removing all old games, not only for current players!
+        self.removeObsoleteWaitingGamesForPartners(partners)
         self.removeAllObsoleteGames()
 
         # Add game
@@ -657,6 +661,8 @@ class GameController(Storage):
         partnersInfo = gameRecord['partnersInfo']
         selfInfo = partnersInfo[Token]
         selfInfo['status'] = 'finished'
+        selfInfo['finishedTimestamp'] = timestamp
+        selfInfo['finishedTimestr'] = timestr
         partnersInfo[Token] = selfInfo
         gameRecord['partnersInfo'] = partnersInfo
 
@@ -699,7 +705,14 @@ class GameController(Storage):
 
         gameStorage.dbSave()
 
-        # TODO: Save to results database?
+        if isAll:
+            # Save game record data
+            updatedGameRecord = dict(gameRecord, **gameUpdateData)
+            DEBUG(getTrace('Save game record data'), updatedGameRecord)
+            recordsStorage.dbSync()
+            recordsStorage.addRecord(Token=gameToken, data=updatedGameRecord)
+            recordsStorage.dbSave()
+            # TODO: Remove from active games? (Or leave it there -- and it'll be removed later automatcally?)
 
         # Remove game waitings for this game
         q = Query()

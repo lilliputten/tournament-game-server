@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @module server
 # @since 2022.02.07, 00:27
-# @changed 2023.02.11, 22:30
+# @changed 2023.03.05, 04:10
 
 import os
 
@@ -35,6 +35,7 @@ if doInit:  # NOTE: Initializing only once (avoiding double initialization with 
     from .blueprintWaiting import blueprintWaiting
     from .blueprintGameSession import blueprintGameSession
     from .blueprintQuestions import blueprintQuestions
+    from .blueprintResults import blueprintResults
 
     DEBUG(getTrace('starting'), {
         'doInit': doInit,
@@ -58,6 +59,7 @@ if doInit:  # NOTE: Initializing only once (avoiding double initialization with 
     app.register_blueprint(blueprintWaiting)
     app.register_blueprint(blueprintGameSession)
     app.register_blueprint(blueprintQuestions)
+    app.register_blueprint(blueprintResults)
 
     # Errors handling...
 

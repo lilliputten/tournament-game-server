@@ -5,13 +5,29 @@
 
 from functools import reduce
 
-from src.core.lib.logger import DEBUG
-from src.core.lib.utils import getTrace
+#  from src.core.lib.logger import DEBUG
+#  from src.core.lib.utils import getTrace
+from src.core.lib.utils import hasNotEmpty, notEmpty
+
+
+def getLatestTimestamp(list):
+    max(filter(notEmpty, list))
+
+
+def getGameTimestamps(gameRecord):
+    ids = ['timestamp', 'startedTimestamp', 'lastActivityTimestamp']
+    return list(filter(None, map(lambda id: gameRecord[id] if hasNotEmpty(gameRecord, id) else None, ids)))
+
+
+def getLatestGameTimestamp(gameRecord):
+    timestamps = getGameTimestamps(gameRecord)
+    return max(timestamps)
 
 
 def getCorrectQuestionAnswersCount(questionAnswers):
     count = reduce(lambda count, key: count + 1 if questionAnswers[key] == 'correct' else count, questionAnswers, 0)
     return count
+
 
 def findQuckestWinnerByStats(stats):
     minTime = None
@@ -24,12 +40,15 @@ def findQuckestWinnerByStats(stats):
             minToken = tkn
     return minToken
 
+
 def determineGameWinner(gameRecord):
     partners = gameRecord['partners']
     partnersInfo = gameRecord['partnersInfo']
     startedTimestamp = gameRecord['startedTimestamp']
     maxCorrectAnswers = 0  # Maximum correct answers count
-    maxCorrectTokens = []  # Collect users with that same maximum correct answers number (to find the fastest of them if there are several of them)
+    # Collect users with that same maximum correct answers number (to find the
+    # fastest of them if there are several of them)
+    maxCorrectTokens = []
     stats = {}
     for tkn in partners:
         data = partnersInfo[tkn]
@@ -39,7 +58,7 @@ def determineGameWinner(gameRecord):
             # New record found!
             maxCorrectAnswers = correctAnswers
             maxCorrectTokens = [tkn]
-        elif  correctAnswers == maxCorrectAnswers:
+        elif correctAnswers == maxCorrectAnswers:
             # Add this user to winner pretenders list
             maxCorrectTokens.append(tkn)
         finishedTimestamp = data['finishedTimestamp']
@@ -79,5 +98,6 @@ def determineGameWinner(gameRecord):
 
 
 __all__ = [  # Exporting objects...
+    'getGameTimestamps',
     'determineGameWinner',
 ]
