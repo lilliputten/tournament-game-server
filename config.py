@@ -132,7 +132,7 @@ config = {  # Default config
 
     # Questions...
 
-    'questionsCount': 1 if isDev else 10,  # Questions number for each quiz session (selecting randomly -- see parameter `useRandomQuestions` -- in `Questions:getClientQuestionIdsList`)
+    'questionsCount': 1 if isDev else 5,  # Questions number for each quiz session (selecting randomly -- see parameter `useRandomQuestions` -- in `Questions:getClientQuestionIdsList`)
     'useRandomQuestions': False if isDev else True,  # To creatre questions list random
     'validQuestionsPeriodMs': 15 * 60 * 1000,  # X mins, Time to update questions list from disk file, see `Questions:getOrLoadQuestionsData`.
 
