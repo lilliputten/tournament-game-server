@@ -31,9 +31,9 @@ See `questions.SAMPLE.yaml` for example.
 
 ## Build info (auto-generated)
 
-- Version: 0.0.1
-- Last changes timestamp: 2023.02.13, 01:15
-- Last changes timetag: 230213-0115
+- Version: 0.0.2
+- Last changes timestamp: 2023.03.05, 06:48
+- Last changes timetag: 230305-0648
 
 
 ## TODO
