@@ -36,7 +36,7 @@ DEBUG(getTrace('starting'), {
 @appAuth.auth.login_required
 def blueprintResults_loadResults():
     """
-    loadResults
+    loadResults -- Get game records table
     """
     # Start error...
     requestError = serverUtils.checkInvalidRequestError(checkToken=True)

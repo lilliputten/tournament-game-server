@@ -2,7 +2,7 @@
 # @module config
 # @desc Universal server & client config
 # @since 2022.02.06, 23:56
-# @changed 2023.03.04, 18:46
+# @changed 2023.03.05, 21:37
 # See:
 #  - https://docs.python.org/3/library/configparser.html -- ???
 #  - https://stackoverflow.com/questions/9590382/forcing-python-json-module-to-work-with-ascii
@@ -52,7 +52,7 @@ timestampFilename = path.join(rootPath, 'build-timestamp.txt')
 timetagFilename = path.join(rootPath, 'build-timetag.txt')
 packageFilename = path.join(rootPath, 'package.json')
 #  Read version...
-#  print('config: packageFilename', packageFilename  # DEBUG)
+#  print('config: packageFilename', packageFilename)  # DEBUG
 if path.isfile(buildVersionFilename):
     version = readFiletoString(buildVersionFilename, 'UNSPECIFIED')
 elif path.isfile(packageFilename):
@@ -132,9 +132,10 @@ config = {  # Default config
 
     # Questions...
 
-    'questionsCount': 1 if isDev else 5,  # Questions number for each quiz session (selecting randomly -- see parameter `useRandomQuestions` -- in `Questions:getClientQuestionIdsList`)
+    'questionsCount': 2 if isDev else 5,  # Questions number for each quiz session (selecting randomly -- see parameter `useRandomQuestions` -- in `Questions:getClientQuestionIdsList`)
     'useRandomQuestions': False if isDev else True,  # To creatre questions list random
     'validQuestionsPeriodMs': 15 * 60 * 1000,  # X mins, Time to update questions list from disk file, see `Questions:getOrLoadQuestionsData`.
+    'recordsTableSize': 2 if isDev else 10,  # Size of game records table
 
     # API
 
@@ -161,9 +162,8 @@ config = {  # Default config
 
 }
 
-# Allows CORS requests from developer (localhost) server
+# Allows CORS requests from developer (localhost) server (NOTE: allow it only on developing cycle)
 allowDebugOrigins = True
-
 if allowDebugOrigins:
     config['legalOrigins'].append('http://localhost:3000')
     config['legalOrigins'].append('http://localhost:5000')
@@ -172,6 +172,11 @@ if allowDebugOrigins:
 updateConfigWithYaml(config, yamlConfigFilename)
 updateConfigWithYaml(config, yamlLocalConfigFilename)
 
-#  #  DEBUG
-#  print('Config:', config)
-#  print('Done')
+
+__all__ = [  # Exporting objects...
+    'config',
+]
+
+
+if __name__ == '__main__':
+    print('@:config: debug run')

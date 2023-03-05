@@ -2,21 +2,16 @@
 # @module RecordsController
 # @desc Records controller utils
 # @since 2023.03.05, 01:34
-# @changed 2023.03.05, 01:34
+# @changed 2023.03.05, 23:36
 
 
-#  from datetime import datetime
-#  from tinydb import Query
-# from tinydb.table import Document
-#  from src import appSession
-#  from src.core.Questions import questions
-# from src.core.lib import serverUtils
 from src.core.lib.Storage import Storage
 
 from src.core.lib.logger import DEBUG
 from src.core.lib.utils import getTrace
 
 from .RecordsStorage import recordsStorage
+from src.core.lib.gameHelpers import getFirstSortedGameRecords
 
 
 class RecordsController(Storage):
@@ -32,11 +27,10 @@ class RecordsController(Storage):
 
     def getRecentRecords(self):
         # TODO: Get gameMode and filter records with it?
-
-        # TODO: Find {recentRecordsCount} recent results sorted by winnerRatio (TODO
-
-        allData = recordsStorage.getAllData()
-        return allData
+        # Find {recordsTableS} recent results sorted by winnerRatio
+        allRecords = recordsStorage.getAllData()
+        recentRecords = getFirstSortedGameRecords(allRecords)
+        return recentRecords
 
 
 # Create singleton...

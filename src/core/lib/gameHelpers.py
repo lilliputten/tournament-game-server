@@ -1,12 +1,14 @@
 # -*- coding:utf-8 -*-
 # @module gameHelpers
 # @since 2023.03.04, 21:43
-# @changed 2023.03.04, 21:43
+# @changed 2023.03.05, 22:47
 
 from functools import reduce
+# import random
 
-#  from src.core.lib.logger import DEBUG
-#  from src.core.lib.utils import getTrace
+from config import config
+from src.core.lib.logger import DEBUG
+from src.core.lib.utils import getTrace
 from src.core.lib.utils import hasNotEmpty, notEmpty
 
 
@@ -42,6 +44,9 @@ def findQuckestWinnerByStats(stats):
 
 
 def determineGameWinner(gameRecord):
+    """
+    Determine game winner. Returns winned player token.
+    """
     partners = gameRecord['partners']
     partnersInfo = gameRecord['partnersInfo']
     startedTimestamp = gameRecord['startedTimestamp']
@@ -97,7 +102,79 @@ def determineGameWinner(gameRecord):
     return fastestToken
 
 
+def getGameRecordRatio(gameRecord):
+    """
+    Calculate composite weighted game ratio (based on winner game time and answered questions number).
+    """
+    # Get required data...
+    winnerToken = gameRecord['winnerToken']
+    startedTimestamp = gameRecord['startedTimestamp']
+    partnersInfo = gameRecord['partnersInfo']
+    info = partnersInfo[winnerToken]
+    # TODO: Check for: not empty info?
+    questionAnswers = info['questionAnswers']
+    finishedTimestamp = info['finishedTimestamp']
+    totalCount = len(questionAnswers)
+    correctCount = getCorrectQuestionAnswersCount(questionAnswers)
+    # Time is game duration in msecs.
+    time = finishedTimestamp - startedTimestamp if finishedTimestamp is not None and startedTimestamp is not None else None
+    # Calculate ratio (using extra multipliers to make ratios enought large numbers: it will be divided to game time in msec and total questions count)...
+    ratio = 1000 * correctCount
+    if totalCount:
+        ratio /= totalCount
+    if time is not None and time:
+        ratio /= time / 60000
+    #  DEBUG(getTrace(), {
+    #      #  'winnerToken': winnerToken,
+    #      #  'startedTimestamp': startedTimestamp,
+    #      #  'partnersInfo': partnersInfo,
+    #      #  'info': info,
+    #      #  'questionAnswers': questionAnswers,
+    #      #  'finishedTimestamp': finishedTimestamp,
+    #      'totalCount': totalCount,
+    #      'correctCount': correctCount,
+    #      'time': time,
+    #      'ratio': ratio,
+    #  })
+    return ratio
+
+
+def getFirstSortedGameRecords(records, recordsTableSize=config['recordsTableSize']):
+    """
+    Get {recordsTableSize} best game records.
+    """
+    ratios = map(lambda gameRecord: {
+        'ratio': getGameRecordRatio(gameRecord),
+        'gameRecord': gameRecord,
+    }, records)
+    # Records with a maximum ratios comes first (largest ration = better game result)
+    sortedRatios = sorted(ratios, key=lambda r: r['ratio'], reverse=True)
+    # Truncate list if required...
+    if recordsTableSize is not None and recordsTableSize < len(sortedRatios):
+        del sortedRatios[recordsTableSize:]
+    sortedRecords = list(map(lambda r: r['gameRecord'], sortedRatios))
+    #  DEBUG(getTrace(), {
+    #      'ratios': ratios,
+    #      'sortedRatios': sortedRatios,
+    #      # 'sortedRecords': sortedRecords,
+    #      'recordsTableSize': recordsTableSize,
+    #  })
+    return sortedRecords
+
+
+def getSortedGameRecordTokens(records, recordsTableSize=config['recordsTableSize']):
+    """
+    Git {recordsTableSize} best game tokens (used for tests only?).
+    """
+    sortedRecords = getFirstSortedGameRecords(records, recordsTableSize)
+    tokens = list(map(lambda gameRecord: gameRecord['Token'], sortedRecords))
+    return tokens
+
+
 __all__ = [  # Exporting objects...
     'getGameTimestamps',
     'determineGameWinner',
+    'getGameRecordRatio',
+    'getFirstSortedGameRecords',
+    'getSortedGameRecordTokens',
 ]
