@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # @module gameHelpers
 # @since 2023.03.04, 21:43
-# @changed 2023.03.05, 22:47
+# @changed 2023.03.05, 23:43
 
 from functools import reduce
 # import random
@@ -143,15 +143,17 @@ def getFirstSortedGameRecords(records, recordsTableSize=config['recordsTableSize
     """
     Get {recordsTableSize} best game records.
     """
-    ratios = map(lambda gameRecord: {
+    # Calculate ratios, remove game records with zero ratios...
+    ratios = filter(lambda r: r['ratio'] > 0, map(lambda gameRecord: {
         'ratio': getGameRecordRatio(gameRecord),
         'gameRecord': gameRecord,
-    }, records)
+    }, records))
     # Records with a maximum ratios comes first (largest ration = better game result)
     sortedRatios = sorted(ratios, key=lambda r: r['ratio'], reverse=True)
     # Truncate list if required...
     if recordsTableSize is not None and recordsTableSize < len(sortedRatios):
         del sortedRatios[recordsTableSize:]
+    # Get only game records list...
     sortedRecords = list(map(lambda r: r['gameRecord'], sortedRatios))
     #  DEBUG(getTrace(), {
     #      'ratios': ratios,

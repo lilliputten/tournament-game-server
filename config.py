@@ -2,7 +2,7 @@
 # @module config
 # @desc Universal server & client config
 # @since 2022.02.06, 23:56
-# @changed 2023.03.05, 21:37
+# @changed 2023.03.06, 00:59
 # See:
 #  - https://docs.python.org/3/library/configparser.html -- ???
 #  - https://stackoverflow.com/questions/9590382/forcing-python-json-module-to-work-with-ascii
@@ -135,7 +135,7 @@ config = {  # Default config
     'questionsCount': 2 if isDev else 5,  # Questions number for each quiz session (selecting randomly -- see parameter `useRandomQuestions` -- in `Questions:getClientQuestionIdsList`)
     'useRandomQuestions': False if isDev else True,  # To creatre questions list random
     'validQuestionsPeriodMs': 15 * 60 * 1000,  # X mins, Time to update questions list from disk file, see `Questions:getOrLoadQuestionsData`.
-    'recordsTableSize': 2 if isDev else 10,  # Size of game records table
+    'recordsTableSize': 15 if isDev else 20,  # Size of game records table
 
     # API
 
