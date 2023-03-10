@@ -1,0 +1,4 @@
+# Override basic config parameters (see `config.py`)
+# @changed 2023.03.10, 13:55
+
+questionsCount: 0 # Questions number for each quiz session (selecting randomly -- see parameter `useRandomQuestions` -- in `Questions:getClientQuestionIdsList`, 0 -- use all available questions)

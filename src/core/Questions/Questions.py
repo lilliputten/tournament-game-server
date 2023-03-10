@@ -125,6 +125,7 @@ class Questions():
     def getClientQuestionIdsList(self):
         """
         Prepare specified amount of questions for clients
+        TODO: Get questions params (count and randomless) from questions set data?
         """
         data = self.getClientQuestionsData()
         qq = data['questions']
