@@ -2,9 +2,12 @@
 # @module RecordsController
 # @desc Records controller utils
 # @since 2023.03.05, 01:34
-# @changed 2023.03.05, 23:36
+# @changed 2023.03.17, 12:03
 
 
+from flask import request
+from tinydb import Query
+from src import appSession
 from src.core.lib.Storage import Storage
 
 from src.core.lib.logger import DEBUG
@@ -28,7 +31,18 @@ class RecordsController(Storage):
     def getRecentRecords(self):
         # TODO: Get gameMode and filter records with it?
         # Find {recordsTableS} recent results sorted by winnerRatio
-        allRecords = recordsStorage.getAllData()
+        args = request.args
+        all = args.get('all')
+        # Find records for current game mode...
+        gameMode = appSession.getVariable('gameMode') if all else ''
+        recordsStorage.dbSync()
+        if gameMode is None or not gameMode:
+            allRecords = recordsStorage.getAllData()
+        else:
+            q = Query()
+            # TODO: Add filter by questions set
+            findQuery = (q.gameMode == gameMode)
+            allRecords = recordsStorage.findRecords(findQuery)
         recentRecords = getFirstSortedGameRecords(allRecords)
         return recentRecords
 
