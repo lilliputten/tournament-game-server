@@ -191,7 +191,7 @@ class GameController(Storage):
         currentTimeStr = getDateStr(now)
 
         waitingStorage.dbSync()
-        gameStorage.dbSync()
+        # gameStorage.dbSync()
 
         # TODO: Check for single player game?
 
@@ -361,6 +361,7 @@ class GameController(Storage):
         }
 
         # Update records...
+        waitingStorage.dbSync()
         db = waitingStorage.getDbHandler()
         q = Query()
 
@@ -580,6 +581,7 @@ class GameController(Storage):
         # Remove game waitings for this game
         q = Query()
         query = (q.gameToken.exists()) & (q.gameToken == gameToken)
+        waitingStorage.dbSync()
         removedWaitings = waitingStorage.extractRecords(query)
 
         waitingStorage.dbSave()
@@ -717,6 +719,7 @@ class GameController(Storage):
         # Remove game waitings for this game
         q = Query()
         query = (q.gameToken.exists()) & (q.gameToken == gameToken)
+        waitingStorage.dbSync()
         removedWaitings = waitingStorage.extractRecords(query)
 
         waitingStorage.dbSave()
