@@ -2,13 +2,15 @@
 # @module Storage
 # @desc Storage for waiting records
 # @since 2023.02.12, 20:38
-# @changed 2023.02.12, 20:38
+# @changed 2023.03.19, 03:24
 
 
 import traceback
 from os import path
 
 import datetime
+from typing import List, Union
+from typing import TypeVar, Generic
 
 # TinyDB. @see: https://tinydb.readthedocs.io/en/latest/usage.html
 from tinydb import TinyDB
@@ -28,7 +30,10 @@ from src.core.lib import tinydbUtils
 from src.core.lib.utils import getTrace
 
 
-class Storage():
+T = TypeVar('T')
+
+
+class Storage(Generic[T]):
 
     testMode = None
 
@@ -109,17 +114,17 @@ class Storage():
         if self.db is not None:
             self.db.truncate()
 
-    def getRecordsCount(self):
+    def getRecordsCount(self) -> int:
         db = self.getDbHandler()
         if db is not None:
             return len(db)
         return 0
 
-    def getAllData(self):
+    def getAllData(self) -> List[T]:
         try:
             db = self.getDbHandler()
             if db is not None:
-                result = db.all()
+                result: List[T] = db.all()  # pyright: ignore
                 return result
         except Exception as err:
             sTraceback = str(traceback.format_exc())
@@ -130,7 +135,7 @@ class Storage():
             raise err
         return []
 
-    def addRecord(self, timestamp=None, Token=None, data=None):
+    def addRecord(self, timestamp=None, Token=None, data=None) -> Union[int, None]:
         """
         Add record with params:
         - timestamp (number)
@@ -169,7 +174,7 @@ class Storage():
             raise err
         return None
 
-    def findRecords(self, query):
+    def findRecords(self, query) -> List[T]:
         """
         `query`: query or fragment (data object with params):
         - `Token`: string,
@@ -195,7 +200,7 @@ class Storage():
                 raise Exception(errStr)
         return []
 
-    def findFirstRecord(self, query):
+    def findFirstRecord(self, query) -> Union[T, None]:
         """
         `query`: query or fragment (data object with params):
         - `Token`: string,
@@ -206,7 +211,7 @@ class Storage():
             return records[0]
         return None
 
-    def extractRecords(self, fragment):
+    def extractRecords(self, fragment) -> List[T]:
         """
         Find and remove records using fragment (all parameters are optional):
         - `Token`: string,
@@ -217,11 +222,11 @@ class Storage():
         if len(records):
             db = self.getDbHandler()
             if db is not None:
-                ids = list(map(lambda rec: rec.doc_id, records))
+                ids = list(map(lambda rec: rec.doc_id, records))  # pyright: ignore
                 db.remove(doc_ids=ids)
         return records
 
-    def removeRecords(self, fragment):
+    def removeRecords(self, fragment) -> List[T]:
         """
         Remove records using fragment (all parameters are optional):
         - `Token`: string,

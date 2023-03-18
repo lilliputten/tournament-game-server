@@ -142,7 +142,6 @@ class GameController(Storage):
                 'gameResumed': True if gameRecord else False,
                 'partnerName': partnerName,
                 'partnerToken': partnerToken,
-                'recordId': foundRecord.doc_id,
                 # error?
             })
             appSession.setVariable('gameToken', gameToken)
@@ -219,10 +218,12 @@ class GameController(Storage):
                 'currentTimeStr': currentTimeStr,
             }
             DEBUG(getTrace('No self record found -> error'), responseData)
+            # TODO: Try to found gameRecord (initiated by parther)?
             return responseData
 
         # Record already have game token?
-        if 'gameToken' in selfRecord and selfRecord['gameToken'] is not None and 'partnerToken' in selfRecord and selfRecord['partnerToken'] is not None:
+        if 'gameToken' in selfRecord and selfRecord['gameToken'] is not None \
+                and 'partnerToken' in selfRecord and selfRecord['partnerToken'] is not None:
             # TODO: To check if it's too old token?
             # Record already have game token -> finished
             responseData = dict(selfRecord, **{
@@ -321,6 +322,7 @@ class GameController(Storage):
             query = query | q.partners.any(tokens)
         # Preserve finished games (TODO: stopped?) TODO: Remove inactive (active=False) games?
         query = query & (q.gameStatus != 'finished')
+        # gameStorage.dbSync() call required in parent function!
         removedGames = gameStorage.extractRecords(query)
         if len(removedGames):
             DEBUG(getTrace('Ovsolete games removed'), {
@@ -410,6 +412,8 @@ class GameController(Storage):
             'partnersInfo': partnersInfo,
         }
 
+        gameStorage.dbSync()
+      
         # Remove old game records...
         # NOTE: Removing all old games, not only for current players!
         self.removeObsoleteWaitingGamesForPartners(partners)
@@ -620,6 +624,16 @@ class GameController(Storage):
 
         gameStorage.dbSync()
 
+        if not Token:
+            error = 'No player token passed'
+            responseData = {
+                'success': False,
+                'reason': 'Error',
+                'error': error,
+            }
+            DEBUG(getTrace('Error: ' + error), responseData)
+            return responseData
+
         if not gameToken:
             error = 'No game token passed'
             responseData = {
@@ -754,6 +768,26 @@ class GameController(Storage):
         Token = appSession.getToken()
         gameToken = appSession.getVariable('gameToken')
 
+        if not Token:
+            error = 'No player token passed'
+            responseData = {
+                'success': False,
+                'reason': 'Error',
+                'error': error,
+            }
+            DEBUG(getTrace('Error: ' + error), responseData)
+            return responseData
+
+        if not gameToken:
+            error = 'No game token passed'
+            responseData = {
+                'success': False,
+                'reason': 'Error',
+                'error': error,
+            }
+            DEBUG(getTrace('Error: ' + error), responseData)
+            return responseData
+
         # Get request data...
         requestData = request.json
         if not requestData:
@@ -887,7 +921,7 @@ class GameController(Storage):
         DEBUG(getTrace(reason), responseData)
         return responseData
 
-    def doSessionCheck(self, request):
+    def doSessionCheck(self, _request):  # pyright: ignore
         # Prepare extra parameters...
         now = datetime.now()
         timestamp = getMsTimeStamp(now)  # Get milliseconds timestamp (for technical usage)
@@ -895,6 +929,26 @@ class GameController(Storage):
 
         Token = appSession.getToken()
         gameToken = appSession.getVariable('gameToken')
+
+        if not Token:
+            error = 'No player token passed'
+            responseData = {
+                'success': False,
+                'reason': 'Error',
+                'error': error,
+            }
+            DEBUG(getTrace('Error: ' + error), responseData)
+            return responseData
+
+        if not gameToken:
+            error = 'No game token passed'
+            responseData = {
+                'success': False,
+                'reason': 'Error',
+                'error': error,
+            }
+            DEBUG(getTrace('Error: ' + error), responseData)
+            return responseData
 
         # Get game data...
         gameStorage.dbSync()
