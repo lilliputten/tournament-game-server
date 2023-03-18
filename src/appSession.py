@@ -121,8 +121,8 @@ def setVariable(key, value):
     session[key] = value
 
 
-def getVariable(key):
-    return session[key]
+def getVariable(key, defaultValue=None):
+    return session[key] if key in session else defaultValue
 
 
 def removeVariable(key):
