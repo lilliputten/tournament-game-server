@@ -18,6 +18,7 @@ from tinydb.storages import MemoryStorage
 from tinydb.middlewares import CachingMiddleware
 
 from config import config
+from src.core.lib.errors import toString
 
 from src.core.lib.logger import DEBUG
 from src.core.lib.logger import (
@@ -183,12 +184,15 @@ class Storage():
                 # False-positive pyright error. TODO?
                 return db.search(query)  # type: ignore
             except Exception as err:
+                errStr = 'Error reading internal storage `' + str(self.dbName) + '`: ' + toString(err)
                 sTraceback = str(traceback.format_exc())
                 DEBUG(getTrace('catched error'), {
+                    'errStr': errStr,
                     'err': err,
                     'traceback': sTraceback,
                 })
-                raise err
+                #  raise err
+                raise Exception(errStr)
         return []
 
     def findFirstRecord(self, query):
