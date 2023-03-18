@@ -29,9 +29,12 @@
       "args": [
         "discover", // Find all test modules
         "-f", // Stop on first fail
-        "-t", ".", // Root project path
-        "-s", "src", // Search in path
-        "-p", "*_test.py", // Search pattern
+        "-t",
+        ".", // Root project path
+        "-s",
+        "src", // Search in path
+        "-p",
+        "*_test.py", // Search pattern
       ],
     },
     {
@@ -47,12 +50,7 @@
         // "src/core/Questions/Questions_test.py",
         "src/core/lib/gameHelpers_test.py",
         // "-k", // Specify test match string below...
-        // // "test_removeQuestionAnswersCorrectData",
-        // // "test_getGameTimestamps",
-        // // "test_determineGameWinner",
-        // // "determineGameWinner",
-        // // "getFirstSortedGameRecordTokens",
-        // "getGameRecordRatio",
+        // "test_getGameRecordRatioTag_dateAffect"
       ],
     },
     {

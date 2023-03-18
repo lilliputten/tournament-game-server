@@ -397,8 +397,8 @@ class GameController(Storage):
         gameData = {
             'questionsIds': questionsIds,
             'gameStatus': 'active',
-            # 'lastActivityTimestamp': timestamp,
-            # 'lastActivityTimestr': timeStr,
+            # 'lastCheckTimestamp': timestamp,
+            # 'lastCheckTimestr': timeStr,
             'gameToken': gameToken,
             'gameMode': gameMode,
             'startedTimestamp': timestamp,

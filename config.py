@@ -169,8 +169,9 @@ if allowDebugOrigins:
     config['legalOrigins'].append('http://localhost:5000')
 
 
-updateConfigWithYaml(config, yamlConfigFilename)
-updateConfigWithYaml(config, yamlLocalConfigFilename)
+if isProd:
+    updateConfigWithYaml(config, yamlConfigFilename)
+    updateConfigWithYaml(config, yamlLocalConfigFilename)
 
 
 __all__ = [  # Exporting objects...

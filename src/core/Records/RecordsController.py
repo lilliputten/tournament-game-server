@@ -14,7 +14,7 @@ from src.core.lib.logger import DEBUG
 from src.core.lib.utils import getTrace
 
 from .RecordsStorage import recordsStorage
-from src.core.lib.gameHelpers import getFirstSortedGameRecords
+from src.core.lib.gameHelpers import getSortedGameRecords
 
 
 class RecordsController(Storage):
@@ -34,7 +34,7 @@ class RecordsController(Storage):
         args = request.args
         all = args.get('all')
         # Find records for current game mode...
-        gameMode = appSession.getVariable('gameMode') if all else ''
+        gameMode = appSession.getVariable('gameMode') if all is None or not all else ''
         recordsStorage.dbSync()
         if gameMode is None or not gameMode:
             allRecords = recordsStorage.getAllData()
@@ -43,7 +43,7 @@ class RecordsController(Storage):
             # TODO: Add filter by questions set
             findQuery = (q.gameMode == gameMode)
             allRecords = recordsStorage.findRecords(findQuery)
-        recentRecords = getFirstSortedGameRecords(allRecords)
+        recentRecords = getSortedGameRecords(allRecords)
         return recentRecords
 
 

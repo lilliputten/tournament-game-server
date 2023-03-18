@@ -110,8 +110,8 @@ TODO: Describe basic server functionality.
 Server command for creating venv:
 
 ```
-virtualenv -p python3 ~/.venv-py3-flask
-source ~/.venv-py3-flask/bin/activate
+virtualenv -p python3 ~/.venv-py3.10-flask
+source ~/.venv-py3.10-flask/bin/activate
 pip install -r requirements.txt
 ```
 

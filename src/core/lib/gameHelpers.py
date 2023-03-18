@@ -1,32 +1,33 @@
 # -*- coding:utf-8 -*-
 # @module gameHelpers
 # @since 2023.03.04, 21:43
-# @changed 2023.03.05, 23:43
+# @changed 2023.03.18, 21:19
 
+# from typing import List, Set, Dict, Tuple, Union, TypedDict
+from typing import List, Dict, Union, Callable
 from functools import reduce
-# import random
 
 from config import config
 # from src.core.lib.logger import DEBUG
 # from src.core.lib.utils import getTrace
 from src.core.lib.utils import hasNotEmpty, notEmpty
+from src.core.types.RecordsTypes import TGameRecord, TRecordData, TSortedRatiosData, timestampFields
 
 
 def getLatestTimestamp(list):
     max(filter(notEmpty, list))
 
 
-def getGameTimestamps(gameRecord):
-    ids = ['timestamp', 'startedTimestamp', 'lastActivityTimestamp']
-    return list(filter(None, map(lambda id: gameRecord[id] if hasNotEmpty(gameRecord, id) else None, ids)))
+def getGameTimestamps(gameRecord: TGameRecord) -> List[int]:
+    return list(filter(None, map(lambda id: gameRecord[id] if hasNotEmpty(gameRecord, id) else None, timestampFields)))
 
 
-def getLatestGameTimestamp(gameRecord):
+def getLatestGameTimestamp(gameRecord: TGameRecord) -> int:
     timestamps = getGameTimestamps(gameRecord)
     return max(timestamps)
 
 
-def getCorrectQuestionAnswersCount(questionAnswers):
+def getCorrectQuestionAnswersCount(questionAnswers: Dict) -> int:
     count = reduce(lambda count, key: count + 1 if questionAnswers[key] == 'correct' else count, questionAnswers, 0)
     return count
 
@@ -43,12 +44,12 @@ def findQuckestWinnerByStats(stats):
     return minToken
 
 
-def determineGameWinner(gameRecord):
+def determineGameWinner(gameRecord: TGameRecord) -> Union[str, None]:
     """
     Determine game winner. Returns winned player token.
     """
-    partners = gameRecord['partners']
     partnersInfo = gameRecord['partnersInfo']
+    partners = partnersInfo.keys()  # gameRecord['partners']
     startedTimestamp = gameRecord['startedTimestamp']
     maxCorrectAnswers = 0  # Maximum correct answers count
     # Collect users with that same maximum correct answers number (to find the
@@ -102,59 +103,153 @@ def determineGameWinner(gameRecord):
     return fastestToken
 
 
-def getGameRecordRatio(gameRecord):
+#  maxRatio = 99999
+maxRatio = 100
+
+
+def findMinStartedTimestamp(records: List[TRecordData]) -> int:
+    getTimestamp: Callable[[TRecordData], int] = lambda record: record['startedTimestamp']
+    timestamps = map(getTimestamp, records)
+    minTimestamp = min(timestamps)
+    return minTimestamp
+
+
+def findMaxFinishedTimestamp(records: List[TRecordData]) -> int:
+    getTimestamp: Callable[[TRecordData], int] = lambda record: record['finishedTimestamp']
+    timestamps = map(getTimestamp, records)
+    maxTimestamp = max(timestamps)
+    return maxTimestamp
+
+
+def findRecordsDuration(records: List[TRecordData]) -> int:
+    maxTimestamp = findMaxFinishedTimestamp(records)
+    minTimestamp = findMinStartedTimestamp(records)
+    return maxTimestamp - minTimestamp
+
+
+# , minTimestamp: Union[int, None] = None, maxTimestamp: Union[int, None] = None) -> float:
+def getGameRecordRatioNumber(recordData: TRecordData) -> float:
     """
     Calculate composite weighted game ratio (based on winner game time and answered questions number).
+    The greather value means the greater priority of the record (zero means no answered questions).
     """
     # Get required data...
-    winnerToken = gameRecord['winnerToken']
-    startedTimestamp = gameRecord['startedTimestamp']
-    partnersInfo = gameRecord['partnersInfo']
-    info = partnersInfo[winnerToken]
-    # TODO: Check for: not empty info?
-    questionAnswers = info['questionAnswers']
-    finishedTimestamp = info['finishedTimestamp']
+    # startedTimestamp = recordData['startedTimestamp']
+    # finishedTimestamp = recordData['finishedTimestamp']
+    questionAnswers = recordData['questionAnswers']
     totalCount = len(questionAnswers)
     correctCount = getCorrectQuestionAnswersCount(questionAnswers)
     # Time is game duration in msecs.
-    time = finishedTimestamp - startedTimestamp if finishedTimestamp is not None and startedTimestamp is not None else None
-    # Calculate ratio (using extra multipliers to make ratios enought large numbers: it will be divided to game time in msec and total questions count)...
-    ratio = 1000 * correctCount
+    # time = finishedTimestamp - startedTimestamp if finishedTimestamp is not None and startedTimestamp is not None else None
+    # Calculate ratio (using extra multipliers to make ratios enought large
+    # numbers: it will be divided to game time in msec and total questions
+    # count)...
+    ratio = 100 * correctCount  # answered questions
     if totalCount:
         ratio /= totalCount
-    if time is not None and time:
-        ratio /= time / 60000
-    #  DEBUG(getTrace(), {
-    #      #  'winnerToken': winnerToken,
-    #      #  'startedTimestamp': startedTimestamp,
-    #      #  'partnersInfo': partnersInfo,
-    #      #  'info': info,
-    #      #  'questionAnswers': questionAnswers,
-    #      #  'finishedTimestamp': finishedTimestamp,
-    #      'totalCount': totalCount,
-    #      'correctCount': correctCount,
-    #      'time': time,
-    #      'ratio': ratio,
-    #  })
+    # if time is not None and time:
+    #     timeRatio = time / 1000
+    #     ratio /= timeRatio
+    # DEBUG(getTrace(), {
+    #     #  'winnerToken': winnerToken,
+    #     #  'startedTimestamp': startedTimestamp,
+    #     #  'partnersInfo': partnersInfo,
+    #     #  'recordData': recordData,
+    #     #  'questionAnswers': questionAnswers,
+    #     #  'finishedTimestamp': finishedTimestamp,
+    #     'totalCount': totalCount,
+    #     'correctCount': correctCount,
+    #     'time': time,
+    #     'ratio': ratio,
+    # })
+    # # UNUSED: Trying to adjust ratio with timestamps (recent games are more prioritable)
+    #  if minTimestamp is not None and maxTimestamp is not None:
+    #      duration = finishedTimestamp - startedTimestamp
+    #      maxDuration = maxTimestamp - minTimestamp
+    #      timeRatio = duration / maxDuration
     return ratio
 
 
-def getFirstSortedGameRecords(records, recordsTableSize=config['recordsTableSize']):
+def getGameRecordRatioTag(recordData: TRecordData,
+                          minTimestamp: Union[int,
+                                              None] = None,
+                          maxTimestamp: Union[int,
+                                              None] = None) -> str:
+    startedTimestamp = recordData['startedTimestamp']
+    finishedTimestamp = recordData['finishedTimestamp']
+    #  duration = finishedTimestamp - startedTimestamp
+    ratio = getGameRecordRatioNumber(recordData)
+    if ratio > maxRatio:
+        ratio = maxRatio
+    if ratio < 0:
+        ratio = 0
+    decimalsCount = 2
+    symbolsCount = len(str(maxRatio))
+    formatStr = '{:0>' + str(symbolsCount + decimalsCount + 1) + '.' + str(decimalsCount) + 'f}'
+    ratioTag = formatStr.format(ratio)
+    #  timestamp = recordData['finishedTimestamp']
+    formatTimeStr = '{:0>13d}'
+    timestampTag = formatTimeStr.format(finishedTimestamp)
+    durationTag = 'NONE'
+    if minTimestamp is not None and maxTimestamp is not None:
+        duration = finishedTimestamp - startedTimestamp
+        maxDuration = maxTimestamp - minTimestamp
+        maxDurationSymbols = len(str(maxDuration))
+        durationDiff = maxDuration - duration
+        durationFormatStr = '{:0>' + str(maxDurationSymbols) + 'd}'
+        durationTag = durationFormatStr.format(durationDiff)
+        timestampTag = durationFormatStr.format(finishedTimestamp - minTimestamp)
+        #  durationRatio = 100 * duration / maxDuration if maxDuration else 0
+        #  durationFormatStr = '{:0>9.5f}'
+        #  durationTag = durationFormatStr.format(durationRatio)
+    return ratioTag + '-' + durationTag + '-' + timestampTag
+
+
+def prepareRecordsData(records: List[TGameRecord]) -> List[TRecordData]:
+    results: List[TRecordData] = []
+    for item in records:
+        winnerToken = item['winnerToken']
+        partnersInfo = item['partnersInfo']
+        partnersKeys = partnersInfo.keys()
+        for partnerToken in partnersKeys:
+            partnerData = partnersInfo[partnerToken]
+            # Clone data excluding some unused keys
+            newData: TRecordData = \
+                dict(partnerData,
+                     **{key: val for key, val in item.items()
+                         if key != 'partners' and key != 'partnersInfo' and key != 'Token'})  # pyright: ignore
+            newData['partnerToken'] = partnerToken
+            if partnerToken == winnerToken:
+                newData['isWinner'] = True
+            results.append(newData)
+    return results
+
+
+def getSortedGameRecords(gameRecords: List[TGameRecord],
+                         recordsTableSize: Union[int,
+                                                 None] = config['recordsTableSize']) -> List[TRecordData]:
     """
     Get {recordsTableSize} best game records.
     """
+    # Get records...
+    recordsList = prepareRecordsData(gameRecords)
+    minTimestamp = findMinStartedTimestamp(recordsList)
+    maxTimestamp = findMaxFinishedTimestamp(recordsList)
     # Calculate ratios, remove game records with zero ratios...
-    ratios = filter(lambda r: r['ratio'] > 0, map(lambda gameRecord: {
-        'ratio': getGameRecordRatio(gameRecord),
-        'gameRecord': gameRecord,
-    }, records))
-    # Records with a maximum ratios comes first (largest ration = better game result)
-    sortedRatios = sorted(ratios, key=lambda r: r['ratio'], reverse=True)
+    createRatiosData: Callable[[TRecordData], TSortedRatiosData] = lambda record: {
+        'ratioTag': getGameRecordRatioTag(record, minTimestamp, maxTimestamp),
+        'record': record,
+    }
+    #  ratios = list(filter(lambda r: r['ratio'] > 0, map(createRatiosData, recordsList)))
+    ratios = list(map(createRatiosData, recordsList))
+    # Records with a maximum ratios comes first (greater ratio = better game result)
+    sortedRatios = sorted(ratios, key=lambda r: r['ratioTag'], reverse=True)
     # Truncate list if required...
     if recordsTableSize is not None and recordsTableSize < len(sortedRatios):
         del sortedRatios[recordsTableSize:]
     # Get only game records list...
-    sortedRecords = list(map(lambda r: r['gameRecord'], sortedRatios))
+    #  sortedRecords: List[Dict] = list(map(lambda r: dict(r['record']), sortedRatios))
+    sortedRecords = list(map(lambda r: r['record'], sortedRatios))
     #  DEBUG(getTrace(), {
     #      'ratios': ratios,
     #      'sortedRatios': sortedRatios,
@@ -164,19 +259,9 @@ def getFirstSortedGameRecords(records, recordsTableSize=config['recordsTableSize
     return sortedRecords
 
 
-def getSortedGameRecordTokens(records, recordsTableSize=config['recordsTableSize']):
-    """
-    Git {recordsTableSize} best game tokens (used for tests only?).
-    """
-    sortedRecords = getFirstSortedGameRecords(records, recordsTableSize)
-    tokens = list(map(lambda gameRecord: gameRecord['Token'], sortedRecords))
-    return tokens
-
-
 __all__ = [  # Exporting objects...
     'getGameTimestamps',
     'determineGameWinner',
-    'getGameRecordRatio',
-    'getFirstSortedGameRecords',
-    'getSortedGameRecordTokens',
+    'getGameRecordRatioNumber',
+    'getSortedGameRecords',
 ]
