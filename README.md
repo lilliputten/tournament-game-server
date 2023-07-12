@@ -1,9 +1,16 @@
 <!--
  @since 2023.02.09, 16:49
- @changed 2023.03.04, 18:50
+ @changed 2023.07.12, 16:53
 -->
 
 # Tournament game backend server
+
+
+## Client & server
+
+Server repo: https://github.com/lilliputten/tournament-game-server
+
+Client repo: https://github.com/lilliputten/tournament-game-client
 
 
 ## Questions file
