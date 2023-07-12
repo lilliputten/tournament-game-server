@@ -101,8 +101,9 @@ TODO: Describe api here (for specific server version)
 
 ## Server urls
 
-Remote server: `https://tournament-game.march.team/`
 Remote server: `https://tournament-game-build.march.team/` (with built app)
+
+Use local flask server instance for local nextjs server development.
 
 
 ## Server
